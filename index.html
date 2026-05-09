@@ -43,8 +43,9 @@
     --kr-shadow:0 20px 60px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
 
     --kr-thumb:30px; --kr-track-h:8px;
-    --kr-ease:cubic-bezier(.2,.7,.2,1);
-    --kr-t-fast:160ms; --kr-t-med:220ms;
+    --kr-ease:cubic-bezier(.32,.72,.16,1);
+    --kr-t-fast:160ms;
+	--kr-t-med:240ms;
   }
   .kairos-roi, .kairos-roi *, .kairos-roi *::before, .kairos-roi *::after { box-sizing:border-box; }
 
@@ -110,6 +111,33 @@
   .kairos-roi__h1 em { color:var(--kr-accent); font-style:normal; }
 
   /* ============ ITERACIÓN COLAPSABLE ============ */
+  	/* ============ ANIMACIÓN APERTURA/CIERRE ============ */
+	/* Habilita interpolación de height: auto (Chrome 129+, Edge, Safari 18+) */
+	.kairos-roi {
+		interpolate-size: allow-keywords;
+	}
+	
+	/* Panel del details: animamos altura + opacidad */
+	.kairos-roi__iter::details-content {
+		height: 0;
+		opacity: 0;
+		overflow: clip;
+		transition:
+			height var(--kr-t-med) var(--kr-ease),
+			opacity var(--kr-t-med) var(--kr-ease),
+			content-visibility var(--kr-t-med) allow-discrete;
+	}
+	.kairos-roi__iter[open]::details-content {
+		height: auto;
+		opacity: 1;
+	}
+	
+	/* Respeto a usuarios con preferencia de motion reducido */
+	@media (prefers-reduced-motion: reduce) {
+		.kairos-roi__iter::details-content {
+			transition: none;
+		}
+	}
   .kairos-roi__iter { border-top:1px solid var(--kr-border); padding-top:1.5rem; }
   .kairos-roi__iter + .kairos-roi__iter { margin-top:1.5rem; }
   .kairos-roi__iter[open] { padding-bottom:.5rem; }

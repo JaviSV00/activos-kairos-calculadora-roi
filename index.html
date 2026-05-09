@@ -218,6 +218,44 @@
                   color 220ms var(--kr-ease),
                   background 220ms var(--kr-ease);
     }
+     .kairos-roi__iter-stat {
+       flex-shrink: 0;
+       display: inline-flex;
+       align-items: baseline;
+       gap: 0.3rem;
+       padding: 0.4rem 0.8rem;
+       border-radius: 999px;
+       background: rgba(249,99,2,0.10);
+       border: 1px solid rgba(249,99,2,0.30);
+       font-variant-numeric: tabular-nums;
+       white-space: nowrap;
+       transition: background 200ms var(--kr-ease),
+                   border-color 200ms var(--kr-ease);
+     }
+     .kairos-roi__iter[open] > summary .kairos-roi__iter-stat {
+       /* cuando está desplegado, el dato ya está dentro: lo difuminamos un poco */
+       background: transparent;
+       border-color: var(--kr-border-2);
+     }
+     .kairos-roi__iter-stat-num {
+       font-family: var(--kr-font-display);
+       font-weight: 900;
+       font-size: 1.05rem;
+       color: var(--kr-accent);
+       letter-spacing: -0.02em;
+       line-height: 1;
+     }
+     .kairos-roi__iter-stat-unit {
+       font-family: var(--kr-font-display);
+       font-size: 0.72rem;
+       font-weight: 600;
+       color: var(--kr-text-soft);
+       letter-spacing: 0.02em;
+     }
+     @media (max-width: 480px) {
+       /* en móvil estrecho lo ocultamos para no apretar el header */
+       .kairos-roi__iter-stat { display: none; }
+     }
     .kairos-roi__iter[open] > summary .kairos-roi__iter-chevron {
       transform: rotate(180deg);
       border-color: var(--kr-accent);
@@ -598,10 +636,10 @@
   <header class="kairos-roi__header">
   <span class="kairos-roi__logo" aria-label="Activos Kairos">
     <img class="kairos-roi__logo-img"
-         src="https://kairos-cwt-img-wp.m4iwjx.easypanel.host/wp-content/uploads/2025/12/Logo-Kairos-Fondo-Transparente.png"
+         src="./Logo-Kairos-Fondo-Transparente.png"
          alt=""
          width="56" height="56"
-         loading="lazy"
+         decoding="async"
          onerror="this.parentElement.classList.add('kairos-roi__logo--fallback');" />
     <svg class="kairos-roi__logo-svg" viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
       <text x="50%" y="54%" text-anchor="middle" dominant-baseline="central"
@@ -617,12 +655,16 @@
 
   <!-- ITERACIÓN 1 — coste de la tarea -->
   <details class="kairos-roi__iter" open>
-    <summary>
-      <h2 class="kairos-roi__title">
-        ¿Cuánto te cuesta la tarea que tu equipo hace <em>en automático</em>?
-      </h2>
-      <span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
-    </summary>
+     <summary>
+       <h2 class="kairos-roi__title">
+         ¿Cuánto te cuesta la tarea que tu equipo hace <em>en automático</em>?
+       </h2>
+       <div class="kairos-roi__iter-stat" aria-live="polite" aria-label="Horas regaladas al año">
+         <span class="kairos-roi__iter-stat-num" id="kr-iter1-stat">0</span>
+         <span class="kairos-roi__iter-stat-unit">h/año</span>
+       </div>
+       <span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
+     </summary>
 
     <div class="kairos-roi__iter-body">
 
@@ -878,6 +920,9 @@
 
         animateValue(outSemana, horasSemana, function (v) { return fmtNum1.format(v); });
         animateValue(outAnio,   horasAnio,   function (v) { return fmtInt.format(v); });
+
+          var iterStat = document.getElementById('kr-iter1-stat');
+          if (iterStat) animateValue(iterStat, horasAnio, function (v) { return fmtInt.format(v); });
 
         if (moneyOn && euroHora > 0) {
           var euros = horasAnio * euroHora;

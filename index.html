@@ -584,12 +584,167 @@
     </div>
   </details>
 
-  <!-- ============================================================
-       AQUÍ va el ITER 2: copia el bloque <details> de arriba,
-       cambia data-iter, data-calc, IDs (kr-*), labels y outputs.
-       Y añade la fórmula correspondiente en CALCS abajo.
-       ============================================================ -->
+  <!-- ============ ITER 2 — coste de buscar información ============ -->
+<details class="kairos-roi__iter" data-iter="iter2" data-calc="costeBusqueda">
+	<summary>
+		<h2 class="kairos-roi__title">
+			¿Cuánto tiempo gasta tu equipo <em>buscando información</em> para hacer 1 tarea?
+		</h2>
+		<div class="kairos-roi__iter-stat" aria-live="polite" aria-label="Horas regaladas al año buscando información">
+			<span class="kairos-roi__iter-stat-num" data-output="horasAnio" data-format="int">0</span>
+			<span class="kairos-roi__iter-stat-unit">h/año</span>
+		</div>
+		<span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
+	</summary>
 
+	<div class="kairos-roi__iter-body">
+		<p class="kairos-roi__subtitle">
+			Cada vez que alguien pregunta <strong>"¿dónde está esto?"</strong>,
+			tu negocio paga. La diferencia entre tener un sistema y no tenerlo
+			se mide en horas — y en euros — al año.
+		</p>
+
+		<form class="kairos-roi__form" novalidate>
+
+			<!-- Slider 1: minutos de búsqueda por tarea -->
+			<div class="kairos-roi__field" data-input="minutosBusqueda">
+				<div class="kairos-roi__field-head">
+					<div>
+						<label class="kairos-roi__label" for="kr-iter2-minutos">¿Cuántos minutos pierde 1 persona buscando info para 1 tarea?</label>
+						<div class="kairos-roi__hint">Tiempo medio antes de poder empezar a trabajar de verdad.</div>
+					</div>
+					<div class="kairos-roi__current">
+						<span class="kairos-roi__current-num" id="kr-iter2-minutos-display"
+							data-format="int" tabindex="0" role="spinbutton"
+							aria-label="Editar minutos de búsqueda">0</span><span class="kairos-roi__current-unit">min/tarea</span>
+					</div>
+				</div>
+				<div class="kairos-roi__slider-wrap">
+					<div class="kairos-roi__bubble" data-format="int">0</div>
+					<input class="kairos-roi__slider" id="kr-iter2-minutos" type="range"
+						min="0" max="60" step="1" value="0"
+						aria-label="Minutos buscando información por tarea" />
+					<div class="kairos-roi__scale">
+						<span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Slider 2: personas -->
+			<div class="kairos-roi__field" data-input="personas">
+				<div class="kairos-roi__field-head">
+					<div>
+						<label class="kairos-roi__label" for="kr-iter2-personas">¿Cuántas personas hacen este tipo de tareas?</label>
+						<div class="kairos-roi__hint">Todas las que necesitan buscar información para trabajar.</div>
+					</div>
+					<div class="kairos-roi__current">
+						<span class="kairos-roi__current-num" id="kr-iter2-personas-display"
+							data-format="int" tabindex="0" role="spinbutton"
+							aria-label="Editar personas">0</span><span class="kairos-roi__current-unit">personas</span>
+					</div>
+				</div>
+				<div class="kairos-roi__slider-wrap">
+					<div class="kairos-roi__bubble" data-format="int">0</div>
+					<input class="kairos-roi__slider" id="kr-iter2-personas" type="range"
+						min="0" max="100" step="1" value="0"
+						aria-label="Número de personas que buscan información" />
+					<div class="kairos-roi__scale">
+						<span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Slider 3: tareas/semana por persona -->
+			<div class="kairos-roi__field kairos-roi__field--full" data-input="tareasSemana">
+				<div class="kairos-roi__field-head">
+					<div>
+						<label class="kairos-roi__label" for="kr-iter2-tareas">¿Cuántas tareas hace cada persona a la semana?</label>
+						<div class="kairos-roi__hint">Promedio semanal por persona, no total del equipo.</div>
+					</div>
+					<div class="kairos-roi__current">
+						<span class="kairos-roi__current-num" id="kr-iter2-tareas-display"
+							data-format="int" tabindex="0" role="spinbutton"
+							aria-label="Editar tareas por semana">0</span><span class="kairos-roi__current-unit">tareas/sem</span>
+					</div>
+				</div>
+				<div class="kairos-roi__slider-wrap">
+					<div class="kairos-roi__bubble" data-format="int">0</div>
+					<input class="kairos-roi__slider" id="kr-iter2-tareas" type="range"
+						min="0" max="100" step="1" value="0"
+						aria-label="Tareas por persona a la semana" />
+					<div class="kairos-roi__scale">
+						<span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Toggle €/hora (independiente del iter1) -->
+			<div class="kairos-roi__field--full">
+				<button type="button" class="kairos-roi__toggle"
+					data-money-toggle aria-pressed="false" aria-controls="kr-iter2-money-field">
+					<span class="kairos-roi__toggle-dot" aria-hidden="true"></span>
+					Quiero ver el equivalente en €
+				</button>
+			</div>
+
+			<!-- Slider 4: €/hora (iter2) -->
+			<div class="kairos-roi__field kairos-roi__field--money kairos-roi__field--full"
+				id="kr-iter2-money-field" data-input="eurohora" data-money-field data-visible="false">
+				<div class="kairos-roi__field-head">
+					<div>
+						<label class="kairos-roi__label" for="kr-iter2-eurohora">€/hora del equipo</label>
+						<div class="kairos-roi__hint">Coste medio por hora trabajada (bruto).</div>
+					</div>
+					<div class="kairos-roi__current">
+						<span class="kairos-roi__current-num" id="kr-iter2-eurohora-display"
+							data-format="int" tabindex="0" role="spinbutton"
+							aria-label="Editar euros por hora">0</span><span class="kairos-roi__current-unit">€/hora</span>
+					</div>
+				</div>
+				<div class="kairos-roi__slider-wrap">
+					<div class="kairos-roi__bubble" data-format="int" data-suffix=" €">0 €</div>
+					<input class="kairos-roi__slider" id="kr-iter2-eurohora" type="range"
+						min="0" max="200" step="1" value="0"
+						aria-label="Euros por hora del equipo" />
+					<div class="kairos-roi__scale">
+						<span>0 €</span><span>40 €</span><span>80 €</span><span>120 €</span><span>160 €</span><span>200 €</span>
+					</div>
+				</div>
+			</div>
+		</form>
+
+		<!-- Resultados -->
+		<section class="kairos-roi__results" aria-live="polite" aria-atomic="true">
+			<article class="kairos-roi__card kairos-roi__card--accent">
+				<p class="kairos-roi__card-value kairos-roi__card-value--accent"
+					data-output="horasSemana" data-format="num1">0</p>
+				<p class="kairos-roi__card-unit">horas / semana buscando información</p>
+			</article>
+			<article class="kairos-roi__card kairos-roi__card--accent">
+				<p class="kairos-roi__card-value kairos-roi__card-value--accent"
+					data-output="horasAnio" data-format="int">0</p>
+				<p class="kairos-roi__card-unit">horas / año buscando información (48 semanas laborables)</p>
+			</article>
+			<article class="kairos-roi__money-result" data-money-result data-visible="false">
+				<p class="kairos-roi__card-value" data-output="euros" data-format="eur">0 €</p>
+				<p class="kairos-roi__card-unit">regalados cada año en buscar información</p>
+				<p class="kairos-roi__money-copy">
+					Y este coste lo pagas dos veces: en horas perdidas, y en la
+					velocidad que no tiene tu equipo para entregar valor real.
+				</p>
+			</article>
+		</section>
+
+		<!-- CTA -->
+		<footer class="kairos-roi__cta">
+			<p class="kairos-roi__cta-text">
+				Si tu equipo pierde más de 1h al día buscando información,
+				<strong>podemos solucionarlo. Hablemos.</strong>
+			</p>
+			<a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
+		</footer>
+	</div>
+</details>
 </div>
 
 <script>
@@ -616,16 +771,22 @@
      Cada función recibe (inputs, ctx) y devuelve un objeto
      cuyas claves coinciden con los [data-output] del DOM. */
   var CALCS = {
-    // ITER 1
-    costeTarea: function (i, ctx) {
-      var horasSemana = (i.minutos * i.personas) / 60;
-      var horasAnio   = horasSemana * SEMANAS_LABORABLES;
-      var euros       = ctx.moneyOn ? horasAnio * (i.eurohora || 0) : 0;
-      return { horasSemana: horasSemana, horasAnio: horasAnio, euros: euros };
-    }
-    // ITER 2 (cuando llegue):
-    // costeBusqueda: function (i, ctx) { ... }
-  };
+     	// ITER 1
+     	costeTarea: function (i, ctx) {
+     		var horasSemana = (i.minutos * i.personas) / 60;
+     		var horasAnio   = horasSemana * SEMANAS_LABORABLES;
+     		var euros       = ctx.moneyOn ? horasAnio * (i.eurohora || 0) : 0;
+     		return { horasSemana: horasSemana, horasAnio: horasAnio, euros: euros };
+     	},
+     	// ITER 2
+     	costeBusqueda: function (i, ctx) {
+     		var minSemana   = i.minutosBusqueda * i.personas * i.tareasSemana;
+     		var horasSemana = minSemana / 60;
+     		var horasAnio   = horasSemana * SEMANAS_LABORABLES;
+     		var euros       = ctx.moneyOn ? horasAnio * (i.eurohora || 0) : 0;
+     		return { horasSemana: horasSemana, horasAnio: horasAnio, euros: euros };
+     	}
+     };
 
   /* ============ HELPERS ============ */
   function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }

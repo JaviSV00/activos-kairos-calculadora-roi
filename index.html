@@ -1,32 +1,19 @@
 <!-- =========================================================
-     CALCULADORA ROI — ACTIVOS KAIROS (App Sencilla · v3)
-     · Sliders interactivos tipo "bolita" Kairos
-     · Count-up animado en cifras
-     · Toggle €/hora
-     · Bloque autónomo (single file) para Custom HTML / GH Pages
-     · Branding: Satoshi + Noto Sans JP, #F96302, #191919
+     CALCULADORA ROI — ACTIVOS KAIROS (App Sencilla · v4)
+     · Slider fluido pixel-perfect (step=1 + @property)
+     · Tipografía Satoshi unificada en UI
+     · Reframing del coste invisible
      ========================================================= -->
 
 <!-- ============================================================
-     ⚠️ SOLO PARA PREVIEW LOCAL / GITHUB PAGES
-     Pinta el fondo de la PÁGINA (body) en grafito Kairos para
-     que el blanco por defecto no moleste durante el desarrollo.
-     ELIMINA ESTE BLOQUE <style> cuando pegues el artefacto en
-     WordPress (allí queremos fondo transparente).
+     ⚠️ SOLO PARA PREVIEW LOCAL / GITHUB PAGES — ELIMINAR EN WP
      ============================================================ -->
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: #191919;
-    min-height: 100%;
-  }
+  html, body { margin: 0; padding: 0; background: #191919; min-height: 100%; }
 </style>
-<!-- ============================================================
-     FIN del bloque "solo preview". Lo de abajo SÍ va a producción.
-     ============================================================ -->
+<!-- ============================================================ -->
 
-<!-- Fuentes corporativas Kairos (Satoshi + Noto Sans JP) -->
+<!-- Fuentes corporativas Kairos -->
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,14 +22,22 @@
 <link rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" />
 
+<!-- Registro de --kr-fill para que el track fill pueda transicionar suavemente -->
+<style>
+  @property --kr-fill {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+</style>
+
 <div class="kairos-roi" role="region" aria-labelledby="kairos-roi-title">
 
   <style>
     /* =========================================================
-       VARIABLES DE ESTILO  ——  AJUSTAR AQUÍ (marketing)
+       VARIABLES DE ESTILO
        ========================================================= */
     .kairos-roi {
-      /* Colores Kairos */
       --kr-bg:        #191919;
       --kr-bg-pure:   #000000;
       --kr-surface:   #1f1f1f;
@@ -56,7 +51,6 @@
       --kr-border:    #2a2a2a;
       --kr-border-2:  #3a3a3a;
 
-      /* Tipografía */
       --kr-font-display: 'Satoshi', -apple-system, BlinkMacSystemFont,
                          'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       --kr-font-body:    'Noto Sans JP', -apple-system, BlinkMacSystemFont,
@@ -66,7 +60,6 @@
       --kr-fs-sub:   clamp(0.95rem, 0.4vw + 0.85rem, 1.05rem);
       --kr-fs-out:   clamp(2rem,   2.8vw + 1rem, 3.2rem);
 
-      /* Forma y espaciado */
       --kr-radius:      22px;
       --kr-radius-sm:   14px;
       --kr-radius-pill: 999px;
@@ -76,18 +69,16 @@
       --kr-shadow:      0 20px 60px rgba(0,0,0,0.45),
                         0 1px 0 rgba(255,255,255,0.04) inset;
 
-      /* Slider */
       --kr-thumb-size:  30px;
       --kr-track-h:     8px;
 
       --kr-ease: cubic-bezier(.2,.7,.2,1);
     }
 
-    /* ========== BASE ========== */
     .kairos-roi * { box-sizing: border-box; }
 
     .kairos-roi {
-      font-family: var(--kr-font-body);
+      font-family: var(--kr-font-display);
       color: var(--kr-text);
       background:
         radial-gradient(circle at 0% 0%, rgba(249,99,2,0.10) 0%, transparent 45%),
@@ -105,26 +96,24 @@
       isolation: isolate;
     }
 
-    /* Orb atmosférico Kairos — identidad propia */
+    /* Orb atmosférico */
     .kairos-roi::before {
       content: "";
       position: absolute;
-      width: 380px;
-      height: 380px;
+      width: 380px; height: 380px;
       border-radius: 50%;
       background: radial-gradient(circle,
         rgba(249,99,2,0.35) 0%,
         rgba(249,99,2,0.10) 40%,
         transparent 70%);
-      top: -120px;
-      right: -120px;
+      top: -120px; right: -120px;
       filter: blur(40px);
       animation: kairos-orb 18s ease-in-out infinite alternate;
       z-index: -1;
       pointer-events: none;
     }
     @keyframes kairos-orb {
-      0%   { transform: translate(0,0)      scale(1); opacity: 0.85; }
+      0%   { transform: translate(0,0)        scale(1);    opacity: 0.85; }
       50%  { transform: translate(-40px,30px) scale(1.08); opacity: 1; }
       100% { transform: translate(20px,60px)  scale(0.95); opacity: 0.7; }
     }
@@ -134,10 +123,8 @@
 
     /* ========== CABECERA ========== */
     .kairos-roi__header {
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
-      margin-bottom: 2rem;
+      display: flex; flex-direction: column;
+      gap: 1.1rem; margin-bottom: 2rem;
     }
     .kairos-roi__brand { display: flex; align-items: center; gap: 0.85rem; }
     .kairos-roi__brand img { height: 40px; width: auto; display: block; }
@@ -147,64 +134,66 @@
       font-size: 0.95rem; color: var(--kr-text);
     }
     .kairos-roi__brand-name span { color: var(--kr-accent); }
-    .kairos-roi__brand-tag {
-      font-family: var(--kr-font-body); font-weight: 400;
-      font-size: 0.78rem; color: var(--kr-muted);
-      letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px;
-    }
+
     .kairos-roi__title {
       font-family: var(--kr-font-display);
       font-size: var(--kr-fs-title);
-      font-weight: 700; letter-spacing: -0.02em;
-      line-height: 1.1; margin: 0;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      margin: 0;
     }
     .kairos-roi__title em { color: var(--kr-accent); font-style: normal; }
+
     .kairos-roi__subtitle {
       font-family: var(--kr-font-body);
       font-size: var(--kr-fs-sub);
       color: var(--kr-text-soft);
       margin: 0; max-width: 60ch;
     }
+    .kairos-roi__subtitle strong { color: var(--kr-text); font-weight: 700; }
 
     /* ========== SLIDERS ========== */
     .kairos-roi__form {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
-      margin-bottom: 2.25rem;
+      display: grid; grid-template-columns: 1fr;
+      gap: 2rem; margin-bottom: 2.25rem;
     }
 
     .kairos-roi__field { display: flex; flex-direction: column; gap: 1rem; }
 
     .kairos-roi__field-head {
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex; align-items: baseline;
+      justify-content: space-between;
       gap: 1rem; flex-wrap: wrap;
     }
     .kairos-roi__label {
       font-family: var(--kr-font-display);
-      font-size: 0.95rem; font-weight: 500;
-      color: var(--kr-text); letter-spacing: -0.005em;
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--kr-text); letter-spacing: -0.01em;
     }
     .kairos-roi__hint {
-      font-family: var(--kr-font-body);
-      font-size: 0.8rem; color: var(--kr-muted); font-weight: 400;
+      font-family: var(--kr-font-display);
+      font-size: 0.82rem; color: var(--kr-muted);
+      font-weight: 400; letter-spacing: 0;
     }
     .kairos-roi__current {
       font-family: var(--kr-font-display);
       font-size: 1.6rem; font-weight: 900;
-      color: var(--kr-accent); letter-spacing: -0.02em;
+      color: var(--kr-accent); letter-spacing: -0.025em;
       line-height: 1; white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
     .kairos-roi__current-unit {
-      font-family: var(--kr-font-body);
+      font-family: var(--kr-font-display);
       font-size: 0.8rem; color: var(--kr-muted);
-      font-weight: 400; margin-left: 0.35rem;
+      font-weight: 500; margin-left: 0.35rem;
+      letter-spacing: 0;
     }
 
-    /* Wrapper del slider con pista, fill y burbuja */
+    /* Wrapper del slider */
     .kairos-roi__slider-wrap {
       position: relative;
-      padding: 26px 0 8px 0; /* hueco arriba para la burbuja */
+      padding: 26px 0 8px 0;
     }
 
     /* Burbuja flotante */
@@ -222,9 +211,12 @@
       border-radius: 999px;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 160ms var(--kr-ease), transform 160ms var(--kr-ease);
+      transition: opacity 160ms var(--kr-ease),
+                  transform 160ms var(--kr-ease),
+                  left 90ms linear;     /* Movimiento fluido horizontal */
       box-shadow: 0 6px 16px rgba(249,99,2,0.45);
       white-space: nowrap;
+      will-change: left;
     }
     .kairos-roi__bubble::after {
       content: "";
@@ -251,6 +243,8 @@
       cursor: pointer;
       margin: 0;
       position: relative;
+      /* Track fill smoothing gracias a @property --kr-fill */
+      transition: --kr-fill 90ms linear;
     }
     /* Track WebKit */
     .kairos-roi__slider::-webkit-slider-runnable-track {
@@ -263,12 +257,9 @@
           var(--kr-border-2) calc(var(--kr-fill, 0) * 1%),
           var(--kr-border-2) 100%);
     }
-    /* Thumb WebKit */
     .kairos-roi__slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: var(--kr-thumb-size);
-      height: var(--kr-thumb-size);
+      -webkit-appearance: none; appearance: none;
+      width: var(--kr-thumb-size); height: var(--kr-thumb-size);
       border-radius: 50%;
       background: var(--kr-accent);
       border: 4px solid var(--kr-bg);
@@ -281,20 +272,14 @@
     }
     .kairos-roi__slider:hover::-webkit-slider-thumb {
       transform: scale(1.12);
-      box-shadow:
-        0 6px 18px rgba(249,99,2,0.55),
-        0 0 0 8px rgba(249,99,2,0.12);
+      box-shadow: 0 6px 18px rgba(249,99,2,0.55), 0 0 0 8px rgba(249,99,2,0.12);
     }
     .kairos-roi__slider:active::-webkit-slider-thumb {
       transform: scale(1.22);
-      box-shadow:
-        0 6px 20px rgba(249,99,2,0.6),
-        0 0 0 12px rgba(249,99,2,0.16);
+      box-shadow: 0 6px 20px rgba(249,99,2,0.6), 0 0 0 12px rgba(249,99,2,0.16);
     }
     .kairos-roi__slider:focus-visible::-webkit-slider-thumb {
-      box-shadow:
-        0 4px 14px rgba(249,99,2,0.45),
-        0 0 0 6px rgba(249,99,2,0.35);
+      box-shadow: 0 4px 14px rgba(249,99,2,0.45), 0 0 0 6px rgba(249,99,2,0.35);
     }
     /* Firefox */
     .kairos-roi__slider::-moz-range-track {
@@ -308,8 +293,7 @@
       background: var(--kr-accent);
     }
     .kairos-roi__slider::-moz-range-thumb {
-      width: var(--kr-thumb-size);
-      height: var(--kr-thumb-size);
+      width: var(--kr-thumb-size); height: var(--kr-thumb-size);
       border-radius: 50%;
       background: var(--kr-accent);
       border: 4px solid var(--kr-bg);
@@ -321,21 +305,19 @@
     .kairos-roi__slider:active::-moz-range-thumb { transform: scale(1.22); }
     .kairos-roi__slider:focus { outline: none; }
 
-    /* Marcas min/max bajo el slider */
+    /* Marcas min/max */
     .kairos-roi__scale {
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--kr-font-body);
-      font-size: 0.72rem;
+      display: flex; justify-content: space-between;
+      font-family: var(--kr-font-display);
+      font-size: 0.72rem; font-weight: 500;
       color: var(--kr-muted);
       margin-top: 0.35rem;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
     }
 
     /* ========== TOGGLE €/hora ========== */
     .kairos-roi__toggle {
-      display: inline-flex; align-items: center;
-      gap: 0.6rem;
+      display: inline-flex; align-items: center; gap: 0.6rem;
       padding: 0.55rem 1rem;
       background: transparent;
       border: 1px solid var(--kr-border-2);
@@ -343,8 +325,9 @@
       border-radius: 999px;
       cursor: pointer;
       font-family: var(--kr-font-display);
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.88rem;
+      letter-spacing: -0.005em;
       transition: all 180ms var(--kr-ease);
       align-self: flex-start;
     }
@@ -360,7 +343,8 @@
     .kairos-roi__toggle-dot {
       width: 8px; height: 8px; border-radius: 50%;
       background: var(--kr-border-2);
-      transition: background 180ms var(--kr-ease);
+      transition: background 180ms var(--kr-ease),
+                  box-shadow 180ms var(--kr-ease);
     }
     .kairos-roi__toggle[aria-pressed="true"] .kairos-roi__toggle-dot {
       background: var(--kr-accent);
@@ -411,16 +395,15 @@
     }
     .kairos-roi__card-label {
       font-family: var(--kr-font-display);
-      font-size: 0.78rem;
+      font-size: 0.78rem; font-weight: 600;
       letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--kr-muted); margin: 0 0 0.5rem 0;
-      font-weight: 500;
     }
     .kairos-roi__card-value {
       font-family: var(--kr-font-display);
       font-size: var(--kr-fs-out);
       font-weight: 900;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.035em;
       color: var(--kr-text);
       line-height: 1.05;
       margin: 0;
@@ -428,8 +411,10 @@
     }
     .kairos-roi__card-value--accent { color: var(--kr-accent); }
     .kairos-roi__card-unit {
-      font-family: var(--kr-font-body);
+      font-family: var(--kr-font-display);   /* ← Satoshi (antes Noto/“Claude”) */
       font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: -0.005em;
       color: var(--kr-text-soft);
       margin: 0.4rem 0 0 0;
     }
@@ -486,7 +471,7 @@
       padding: 0.95rem 1.7rem;
       font-family: var(--kr-font-display);
       font-size: 1rem; font-weight: 700;
-      letter-spacing: -0.005em;
+      letter-spacing: -0.01em;
       color: var(--kr-bg);
       background: var(--kr-accent);
       border: 1px solid var(--kr-accent);
@@ -510,32 +495,9 @@
     }
     .kairos-roi__cta-btn::after {
       content: "→";
-      font-family: var(--kr-font-display);
       transition: transform 180ms var(--kr-ease);
     }
     .kairos-roi__cta-btn:hover::after { transform: translateX(3px); }
-
-    .kairos-roi__footnote {
-      margin-top: 1.5rem;
-      font-family: var(--kr-font-body);
-      font-size: 0.78rem;
-      color: var(--kr-muted);
-      text-align: center;
-      letter-spacing: 0.04em;
-    }
-    .kairos-roi__footnote em {
-      color: var(--kr-accent);
-      font-style: normal; font-weight: 700;
-    }
-
-    /* Accesibilidad — visually-hidden para inputs nativos invisibles */
-    .kairos-roi__sr {
-      position: absolute !important;
-      width: 1px; height: 1px;
-      padding: 0; margin: -1px;
-      overflow: hidden; clip: rect(0,0,0,0);
-      white-space: nowrap; border: 0;
-    }
   </style>
 
   <!-- =========================================================
@@ -548,35 +510,31 @@
         alt="Activos Kairos"
         loading="lazy"
         width="40" height="40" />
-      <div>
-        <div class="kairos-roi__brand-name">Activos <span>Kairos</span></div>
-        <div class="kairos-roi__brand-tag">Calculadora · Vive el proceso</div>
-      </div>
+      <div class="kairos-roi__brand-name">Activos <span>Kairos</span></div>
     </div>
 
     <h2 id="kairos-roi-title" class="kairos-roi__title">
-      ¿Cuánto tiempo te devuelve un <em>Activo Kairos</em>?
+      ¿Cuánto te cuesta la tarea que tu equipo hace
+      <em>en automático</em>?
     </h2>
     <p class="kairos-roi__subtitle">
-      Mueve las bolitas y descubre las
-      <strong>horas que tu equipo recupera</strong> con un Activo Kairos. No
-      medimos costes evitados: medimos
-      <em style="color:var(--kr-accent); font-style:normal; font-weight:700;">capacidad
-      productiva liberada</em> que puedes reinvertir en construir tu próximo
-      Momento Kairos.
+      Esa tarea que se repite cada semana en tu negocio. La que
+      <strong>nadie cuestiona</strong> porque "siempre se ha hecho así".
+      Mueve las bolitas con tus números reales y descubre cuántas horas — y
+      cuántos euros — llevas años regalando sin saberlo.
     </p>
   </header>
 
   <form class="kairos-roi__form" novalidate aria-describedby="kairos-roi-title">
 
-    <!-- Slider 1: minutos por persona y semana -->
+    <!-- Slider 1 -->
     <div class="kairos-roi__field">
       <div class="kairos-roi__field-head">
         <div>
           <label class="kairos-roi__label" for="kr-minutos">
-            Minutos ahorrados por persona y semana
+            Minutos que dedica una persona cada semana a esa tarea
           </label>
-          <div class="kairos-roi__hint">Tiempo que cada persona deja de invertir en la tarea, semanalmente.</div>
+          <div class="kairos-roi__hint">Suma todas las veces que la hace en una semana media.</div>
         </div>
         <div class="kairos-roi__current">
           <span id="kr-minutos-display">0</span><span class="kairos-roi__current-unit">min/sem</span>
@@ -588,23 +546,23 @@
           class="kairos-roi__slider"
           id="kr-minutos"
           type="range"
-          min="0" max="300" step="5" value="0"
+          min="0" max="300" step="1" value="0"
           aria-valuemin="0" aria-valuemax="300" aria-valuenow="0"
-          aria-label="Minutos ahorrados por persona y semana" />
+          aria-label="Minutos que dedica una persona cada semana a esa tarea" />
         <div class="kairos-roi__scale">
           <span>0</span><span>60</span><span>120</span><span>180</span><span>240</span><span>300</span>
         </div>
       </div>
     </div>
 
-    <!-- Slider 2: nº de personas -->
+    <!-- Slider 2 -->
     <div class="kairos-roi__field">
       <div class="kairos-roi__field-head">
         <div>
           <label class="kairos-roi__label" for="kr-personas">
-            Número de personas afectadas
+            Cuántas personas de tu equipo la hacen
           </label>
-          <div class="kairos-roi__hint">Personas del equipo que se benefician del Activo Kairos.</div>
+          <div class="kairos-roi__hint">Incluye a quien la supervisa, revisa o corrige.</div>
         </div>
         <div class="kairos-roi__current">
           <span id="kr-personas-display">0</span><span class="kairos-roi__current-unit">personas</span>
@@ -618,7 +576,7 @@
           type="range"
           min="0" max="100" step="1" value="0"
           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-          aria-label="Número de personas afectadas" />
+          aria-label="Cuántas personas de tu equipo la hacen" />
         <div class="kairos-roi__scale">
           <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
         </div>
@@ -636,11 +594,9 @@
       Quiero ver el equivalente en €
     </button>
 
-    <!-- Slider 3: €/hora (oculto por defecto) -->
-    <div
-      class="kairos-roi__field kairos-roi__field--money"
-      id="kr-money-field"
-      data-visible="false">
+    <!-- Slider 3 €/hora -->
+    <div class="kairos-roi__field kairos-roi__field--money"
+         id="kr-money-field" data-visible="false">
       <div class="kairos-roi__field-head">
         <div>
           <label class="kairos-roi__label" for="kr-eurohora">
@@ -673,23 +629,23 @@
   <section class="kairos-roi__results" aria-live="polite" aria-atomic="true">
 
     <article class="kairos-roi__card kairos-roi__card--accent">
-      <p class="kairos-roi__card-label">Horas liberadas a la semana</p>
+      <p class="kairos-roi__card-label">Horas que regalas a la semana</p>
       <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-semana">0</p>
       <p class="kairos-roi__card-unit">horas / semana</p>
     </article>
 
     <article class="kairos-roi__card kairos-roi__card--accent">
-      <p class="kairos-roi__card-label">Horas liberadas al año</p>
+      <p class="kairos-roi__card-label">Horas que regalas al año</p>
       <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-anio">0</p>
       <p class="kairos-roi__card-unit">horas / año (48 semanas laborables)</p>
     </article>
 
     <article class="kairos-roi__money-result" id="kr-money" data-visible="false">
-      <p class="kairos-roi__card-label">Capacidad productiva liberada al año</p>
+      <p class="kairos-roi__card-label">Lo que esa tarea te cuesta cada año</p>
       <p class="kairos-roi__card-value" id="kr-out-euros">0 €</p>
       <p class="kairos-roi__money-copy">
-        Estas son horas que tu equipo puede reinvertir en generar más ingresos
-        gracias al Activo Kairos.
+        Esto es lo que llevas años pagando por una tarea que ni genera
+        ingresos ni diferencia tu negocio. Y es solo la punta del iceberg.
       </p>
     </article>
 
@@ -698,31 +654,25 @@
   <!-- ========== CTA ========== -->
   <footer class="kairos-roi__cta">
     <p class="kairos-roi__cta-text">
-      Esto es solo el ahorro de horas. El ROI completo de un Activo Kairos
-      incluye también <strong>capacidad, calidad y escalabilidad</strong>.
-      Hablemos de tu caso.
+      Y esto es solo el coste <strong>evidente</strong>. El real incluye errores,
+      cuellos de botella y todo el tiempo que tu equipo no le dedica a lo que
+      de verdad mueve tu negocio. Hablemos.
     </p>
     <a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
   </footer>
 
-  <p class="kairos-roi__footnote">
-    Activos Kairos · <em>Vive el proceso</em>
-  </p>
-
   <!-- =========================================================
-       LÓGICA  (vanilla JS, sin dependencias)
+       LÓGICA
        ========================================================= -->
   <script>
     (function () {
-      // ====== CONSTANTES ======
       var SEMANAS_LABORABLES_AL_ANIO = 48;
       var REDUCED_MOTION = window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // ====== REFERENCIAS ======
-      var slMin  = document.getElementById('kr-minutos');
-      var slPer  = document.getElementById('kr-personas');
-      var slEur  = document.getElementById('kr-eurohora');
+      var slMin = document.getElementById('kr-minutos');
+      var slPer = document.getElementById('kr-personas');
+      var slEur = document.getElementById('kr-eurohora');
 
       var dspMin = document.getElementById('kr-minutos-display');
       var dspPer = document.getElementById('kr-personas-display');
@@ -736,14 +686,12 @@
       var moneyToggle = document.getElementById('kr-money-toggle');
       var moneyField  = document.getElementById('kr-money-field');
 
-      // ====== FORMATEADORES (es-ES) ======
       var fmtNum1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
       var fmtInt  = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
       var fmtEur  = new Intl.NumberFormat('es-ES', {
         style: 'currency', currency: 'EUR', maximumFractionDigits: 0
       });
 
-      // ====== UTILIDADES ======
       function pctSlider(slider) {
         var min = parseFloat(slider.min);
         var max = parseFloat(slider.max);
@@ -755,7 +703,6 @@
       function paintSlider(slider) {
         var pct = pctSlider(slider);
         slider.style.setProperty('--kr-fill', pct.toFixed(2));
-        // Actualiza aria-valuenow
         slider.setAttribute('aria-valuenow', slider.value);
       }
 
@@ -764,14 +711,13 @@
         var max = parseFloat(slider.max);
         var val = parseFloat(slider.value);
         var pct = (max === min) ? 0 : (val - min) / (max - min);
-        var thumbW = 30; // var(--kr-thumb-size)
+        var thumbW = 30;
         var trackW = slider.offsetWidth;
         if (trackW === 0) return;
         var x = pct * (trackW - thumbW) + thumbW / 2;
         bubble.style.left = x + 'px';
       }
 
-      // Count-up animado con easeOutCubic
       function animateValue(el, target, formatter) {
         var startVal = parseFloat(el.dataset.current || '0');
         if (REDUCED_MOTION || startVal === target) {
@@ -793,24 +739,20 @@
         el._raf = requestAnimationFrame(tick);
       }
 
-      // ====== RECÁLCULO ======
       function recalcular() {
         var minutos  = parseFloat(slMin.value) || 0;
         var personas = parseFloat(slPer.value) || 0;
         var euroHora = parseFloat(slEur.value) || 0;
         var moneyOn  = moneyToggle.getAttribute('aria-pressed') === 'true';
 
-        // Mostrar valores actuales en cabecera de cada slider
         dspMin.textContent = fmtInt.format(minutos);
         dspPer.textContent = fmtInt.format(personas);
         dspEur.textContent = fmtInt.format(euroHora);
 
-        // Burbujas
         document.querySelector('[data-bubble-for="kr-minutos"]').textContent  = fmtInt.format(minutos);
         document.querySelector('[data-bubble-for="kr-personas"]').textContent = fmtInt.format(personas);
         document.querySelector('[data-bubble-for="kr-eurohora"]').textContent = fmtInt.format(euroHora) + ' €';
 
-        // Cálculo
         var horasSemana = (minutos * personas) / 60;
         var horasAnio   = horasSemana * SEMANAS_LABORABLES_AL_ANIO;
 
@@ -828,7 +770,6 @@
         }
       }
 
-      // ====== EVENTOS POR SLIDER ======
       function bindSlider(slider) {
         var wrap   = slider.closest('.kairos-roi__slider-wrap');
         var bubble = wrap.querySelector('.kairos-roi__bubble');
@@ -841,8 +782,7 @@
         slider.addEventListener('input', update);
         slider.addEventListener('change', update);
 
-        // Mostrar burbuja mientras se arrastra (incluso sin hover en touch)
-        var setActive = function () { wrap.setAttribute('data-active', 'true'); };
+        var setActive   = function () { wrap.setAttribute('data-active', 'true'); };
         var unsetActive = function () { wrap.removeAttribute('data-active'); };
         slider.addEventListener('pointerdown', setActive);
         slider.addEventListener('pointerup', unsetActive);
@@ -852,7 +792,6 @@
         slider.addEventListener('focus', setActive);
         slider.addEventListener('blur', unsetActive);
 
-        // Estado inicial
         update();
       }
 
@@ -860,14 +799,12 @@
       bindSlider(slPer);
       bindSlider(slEur);
 
-      // ====== TOGGLE €/hora ======
       moneyToggle.addEventListener('click', function () {
         var on = moneyToggle.getAttribute('aria-pressed') === 'true';
         var next = !on;
         moneyToggle.setAttribute('aria-pressed', next ? 'true' : 'false');
         moneyField.setAttribute('data-visible', next ? 'true' : 'false');
         if (next) {
-          // Reposicionar burbuja al hacer visible (offsetWidth ahora sí existe)
           requestAnimationFrame(function () {
             paintSlider(slEur);
             positionBubble(
@@ -879,7 +816,6 @@
         recalcular();
       });
 
-      // ====== REPOSICIONAR EN RESIZE ======
       var resizeRaf;
       window.addEventListener('resize', function () {
         if (resizeRaf) cancelAnimationFrame(resizeRaf);

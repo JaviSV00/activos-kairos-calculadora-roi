@@ -424,6 +424,7 @@ CALCULADORA ROI — ACTIVOS KAIROS · v9
 .kairos-roi__cta-text {
 	font-family:var(--kr-font-body); font-size:.98rem;
 	color:var(--kr-text-soft); margin:0;
+	transition: opacity 160ms var(--kr-ease);
 }
 .kairos-roi__cta-text strong { color:var(--kr-text); font-weight:700; }
 .kairos-roi__cta-btn {
@@ -598,16 +599,6 @@ CALCULADORA ROI — ACTIVOS KAIROS · v9
 					</p>
 				</article>
 			</section>
-
-			<!-- CTA -->
-			<footer class="kairos-roi__cta">
-				<p class="kairos-roi__cta-text">
-					Y esto es solo el coste <strong>evidente</strong>. El real incluye errores,
-					cuellos de botella y todo el tiempo que tu equipo no le dedica a lo que
-					de verdad mueve tu negocio. Hablemos.
-				</p>
-				<a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
-			</footer>
 		</div>
 	</details>
 
@@ -740,17 +731,17 @@ CALCULADORA ROI — ACTIVOS KAIROS · v9
 					</p>
 				</article>
 			</section>
-
-			<!-- CTA -->
-			<footer class="kairos-roi__cta">
-				<p class="kairos-roi__cta-text">
-					Si tu equipo pierde más tiempo al día buscando información de lo que te gustaría,
-					<strong>podemos solucionarlo. Hablemos.</strong>
-				</p>
-				<a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
-			</footer>
 		</div>
 	</details>
+
+	<!-- ============ CTA GLOBAL (único) ============ -->
+	<footer class="kairos-roi__cta" data-cta-footer>
+		<p class="kairos-roi__cta-text" data-cta-text>
+			Cada panel te muestra una parte del coste invisible que ya estás pagando.
+			<strong>Abre uno y descúbrelo.</strong>
+		</p>
+		<a class="kairos-roi__cta-btn" href="#contacto" rel="noopener" data-cta-btn>Hablemos</a>
+	</footer>
 </div>
 
 <script>
@@ -767,6 +758,13 @@ CALCULADORA ROI — ACTIVOS KAIROS · v9
 		int:  new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }),
 		num1: new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 }),
 		eur:  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+	};
+
+	/* ============ CTA TEXTS ============ */
+	var CTA_TEXTS = {
+		"default": 'Cada panel te muestra una parte del coste invisible que ya estás pagando. <strong>Abre uno y descúbrelo.</strong>',
+		"iter1": 'Y esto es solo el coste <strong>evidente</strong>. El real incluye errores, cuellos de botella y todo el tiempo que tu equipo no le dedica a lo que de verdad mueve tu negocio. Hablemos.',
+		"iter2": 'Si tu equipo pierde más tiempo al día buscando información de lo que te gustaría, <strong>podemos solucionarlo. Hablemos.</strong>'
 	};
 	function fmt(v, id) { return (FORMATS[id] || FORMATS.int).format(v); }
 
@@ -1102,6 +1100,29 @@ CALCULADORA ROI — ACTIVOS KAIROS · v9
 				});
 			});
 		});
+
+		/* ===== CTA dinámico según panel abierto ===== */
+		var ctaTextEl = ROOT.querySelector('[data-cta-text]');
+		function updateCtaText() {
+			if (!ctaTextEl) return;
+			var openIter = null;
+			for (var i = 0; i < iters.length; i++) {
+				if (iters[i].open) { openIter = iters[i]; break; }
+			}
+			var key = openIter ? openIter.dataset.iter : 'default';
+			var html = CTA_TEXTS[key] || CTA_TEXTS["default"];
+			if (ctaTextEl.innerHTML.trim() === html.trim()) return;
+			/* fade suave */
+			ctaTextEl.style.opacity = '0';
+			setTimeout(function () {
+				ctaTextEl.innerHTML = html;
+				ctaTextEl.style.opacity = '1';
+			}, 160);
+		}
+		iters.forEach(function (iterEl) {
+			iterEl.addEventListener('toggle', updateCtaText);
+		});
+		updateCtaText();
 
 		/* Resize throttled */
 		var resizeRaf = null;

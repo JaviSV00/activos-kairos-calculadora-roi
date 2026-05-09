@@ -638,7 +638,7 @@
 			<div class="kairos-roi__field" data-input="minutosBusqueda">
 				<div class="kairos-roi__field-head">
 					<div>
-						<label class="kairos-roi__label" for="kr-iter2-minutos">¿Cuántos minutos pierde 1 persona buscando info para 1 tarea?</label>
+						<label class="kairos-roi__label" for="kr-iter2-minutos">¿Cuántos minutos pierdes buscando información por semana?</label>
 						<div class="kairos-roi__hint">Tiempo medio antes de poder empezar a trabajar de verdad.</div>
 					</div>
 					<div class="kairos-roi__current">
@@ -676,30 +676,6 @@
 					<input class="kairos-roi__slider" id="kr-iter2-personas" type="range"
 						min="0" max="100" step="1" value="0"
 						aria-label="Número de personas que buscan información" />
-					<div class="kairos-roi__scale">
-						<span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
-					</div>
-				</div>
-			</div>
-
-			<!-- Slider 3: tareas/semana por persona -->
-			<div class="kairos-roi__field kairos-roi__field--full" data-input="tareasSemana">
-				<div class="kairos-roi__field-head">
-					<div>
-						<label class="kairos-roi__label" for="kr-iter2-tareas">¿Cuántas tareas hace cada persona a la semana?</label>
-						<div class="kairos-roi__hint">Promedio semanal por persona, no total del equipo.</div>
-					</div>
-					<div class="kairos-roi__current">
-						<span class="kairos-roi__current-num" id="kr-iter2-tareas-display"
-							data-format="int" tabindex="0" role="spinbutton"
-							aria-label="Editar tareas por semana">0</span><span class="kairos-roi__current-unit">tareas/sem</span>
-					</div>
-				</div>
-				<div class="kairos-roi__slider-wrap">
-					<div class="kairos-roi__bubble" data-format="int">0</div>
-					<input class="kairos-roi__slider" id="kr-iter2-tareas" type="range"
-						min="0" max="100" step="1" value="0"
-						aria-label="Tareas por persona a la semana" />
 					<div class="kairos-roi__scale">
 						<span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
 					</div>
@@ -766,7 +742,7 @@
 		<!-- CTA -->
 		<footer class="kairos-roi__cta">
 			<p class="kairos-roi__cta-text">
-				Si tu equipo pierde más de 1h al día buscando información,
+				Si tu equipo pierde más tiempo al día buscando información de lo que te gustaría,
 				<strong>podemos solucionarlo. Hablemos.</strong>
 			</p>
 			<a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
@@ -808,7 +784,7 @@
      	},
      	// ITER 2
      	costeBusqueda: function (i, ctx) {
-     		var minSemana   = i.minutosBusqueda * i.personas * i.tareasSemana;
+     		var minSemana   = i.minutosBusqueda * i.personas;
      		var horasSemana = minSemana / 60;
      		var horasAnio   = horasSemana * SEMANAS_LABORABLES;
      		var euros       = ctx.moneyOn ? horasAnio * (i.eurohora || 0) : 0;

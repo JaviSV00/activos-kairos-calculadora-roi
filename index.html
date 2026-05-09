@@ -1,0 +1,478 @@
+<!-- =========================================================
+     CALCULADORA ROI — ACTIVOS KAIROS (App Sencilla)
+     Mide HORAS LIBERADAS por un Activo Kairos.
+     Bloque autónomo: HTML + CSS + JS inline. Sin dependencias.
+     ========================================================= -->
+<div class="kairos-roi" role="region" aria-labelledby="kairos-roi-title">
+
+  <style>
+    /* =========================================================
+       VARIABLES DE ESTILO  ——  AJUSTAR AQUÍ (marketing)
+       ========================================================= */
+    .kairos-roi {
+      /* Colores */
+      --kr-bg:        #1a1a1a;   /* Fondo principal */
+      --kr-surface:   #232323;   /* Tarjetas / inputs */
+      --kr-text:      #ffffff;   /* Texto principal */
+      --kr-text-soft: #c9c9c9;   /* Texto secundario */
+      --kr-muted:     #8a8a8a;   /* Texto auxiliar / hints */
+      --kr-accent:    #C9A96E;   /* Acento Kairos */
+      --kr-accent-2:  #b8975a;   /* Acento hover */
+      --kr-border:    #333333;   /* Bordes sutiles */
+
+      /* Tipografía */
+      --kr-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+      --kr-fs-title: clamp(1.6rem, 2.4vw + 1rem, 2.4rem);
+      --kr-fs-sub:   clamp(0.95rem, 0.4vw + 0.85rem, 1.05rem);
+      --kr-fs-out:   clamp(1.8rem, 2.6vw + 1rem, 2.8rem);
+
+      /* Espaciado y formas */
+      --kr-radius:    18px;
+      --kr-radius-sm: 12px;
+      --kr-gap:       1.25rem;
+      --kr-pad:       clamp(1.25rem, 2vw + 0.5rem, 2.5rem);
+      --kr-maxw:      820px;
+      --kr-shadow:    0 10px 40px rgba(0,0,0,0.25);
+
+      /* Transiciones */
+      --kr-ease: cubic-bezier(.2,.7,.2,1);
+    }
+
+    /* =========================================================
+       LAYOUT BASE
+       ========================================================= */
+    .kairos-roi * { box-sizing: border-box; }
+
+    .kairos-roi {
+      font-family: var(--kr-font);
+      color: var(--kr-text);
+      background: var(--kr-bg);
+      border-radius: var(--kr-radius);
+      padding: var(--kr-pad);
+      max-width: var(--kr-maxw);
+      margin: 2rem auto;
+      box-shadow: var(--kr-shadow);
+      line-height: 1.5;
+    }
+
+    .kairos-roi__header { margin-bottom: 1.75rem; }
+
+    .kairos-roi__title {
+      font-size: var(--kr-fs-title);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.5rem 0;
+    }
+    .kairos-roi__title em {
+      color: var(--kr-accent);
+      font-style: normal;
+    }
+    .kairos-roi__subtitle {
+      font-size: var(--kr-fs-sub);
+      color: var(--kr-text-soft);
+      margin: 0;
+      max-width: 60ch;
+    }
+
+    /* =========================================================
+       INPUTS
+       ========================================================= */
+    .kairos-roi__form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--kr-gap);
+      margin-bottom: 1.75rem;
+    }
+    @media (min-width: 640px) {
+      .kairos-roi__form { grid-template-columns: 1fr 1fr; }
+      .kairos-roi__field--full { grid-column: 1 / -1; }
+    }
+
+    .kairos-roi__field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .kairos-roi__label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--kr-text);
+    }
+    .kairos-roi__hint {
+      font-size: 0.8rem;
+      color: var(--kr-muted);
+    }
+
+    .kairos-roi__input {
+      width: 100%;
+      padding: 0.95rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--kr-text);
+      background: var(--kr-surface);
+      border: 1px solid var(--kr-border);
+      border-radius: var(--kr-radius-sm);
+      transition: border-color 180ms var(--kr-ease),
+                  box-shadow 180ms var(--kr-ease);
+      -moz-appearance: textfield;
+    }
+    .kairos-roi__input::-webkit-outer-spin-button,
+    .kairos-roi__input::-webkit-inner-spin-button { margin: 0; }
+    .kairos-roi__input:focus {
+      outline: none;
+      border-color: var(--kr-accent);
+      box-shadow: 0 0 0 3px rgba(201,169,110,0.25);
+    }
+    .kairos-roi__input::placeholder { color: var(--kr-muted); }
+
+    /* =========================================================
+       RESULTADOS
+       ========================================================= */
+    .kairos-roi__results {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--kr-gap);
+    }
+    @media (min-width: 640px) {
+      .kairos-roi__results { grid-template-columns: 1fr 1fr; }
+    }
+
+    .kairos-roi__card {
+      background: var(--kr-surface);
+      border: 1px solid var(--kr-border);
+      border-radius: var(--kr-radius-sm);
+      padding: 1.4rem 1.5rem;
+    }
+    .kairos-roi__card--accent {
+      border-color: rgba(201,169,110,0.45);
+      background: linear-gradient(180deg,
+        rgba(201,169,110,0.08) 0%,
+        var(--kr-surface) 100%);
+    }
+    .kairos-roi__card-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--kr-muted);
+      margin: 0 0 0.4rem 0;
+    }
+    .kairos-roi__card-value {
+      font-size: var(--kr-fs-out);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--kr-text);
+      line-height: 1.1;
+      margin: 0;
+      transition: transform 220ms var(--kr-ease), opacity 220ms var(--kr-ease);
+    }
+    .kairos-roi__card-value--accent { color: var(--kr-accent); }
+    .kairos-roi__card-unit {
+      font-size: 0.95rem;
+      color: var(--kr-text-soft);
+      margin: 0.25rem 0 0 0;
+    }
+
+    /* Bloque € (oculto si €/hora vacío) */
+    .kairos-roi__money {
+      display: none;
+      grid-column: 1 / -1;
+      background: var(--kr-surface);
+      border: 1px solid var(--kr-border);
+      border-radius: var(--kr-radius-sm);
+      padding: 1.4rem 1.5rem;
+    }
+    .kairos-roi__money[data-visible="true"] { display: block; }
+    .kairos-roi__money-copy {
+      font-size: 0.95rem;
+      color: var(--kr-text-soft);
+      margin: 0.6rem 0 0 0;
+      max-width: 60ch;
+    }
+
+    /* Animación sutil al recalcular */
+    .kairos-roi__pulse {
+      animation: kairos-pulse 280ms var(--kr-ease);
+    }
+    @keyframes kairos-pulse {
+      0%   { transform: translateY(2px); opacity: 0.6; }
+      100% { transform: translateY(0);   opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .kairos-roi__pulse { animation: none; }
+      .kairos-roi__card-value { transition: none; }
+    }
+
+    /* =========================================================
+       CTA
+       ========================================================= */
+    .kairos-roi__cta {
+      margin-top: 2rem;
+      padding-top: 1.75rem;
+      border-top: 1px solid var(--kr-border);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    @media (min-width: 640px) {
+      .kairos-roi__cta {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+    .kairos-roi__cta-text {
+      font-size: 0.98rem;
+      color: var(--kr-text-soft);
+      margin: 0;
+      max-width: 60ch;
+    }
+    .kairos-roi__cta-btn {
+      display: inline-block;
+      padding: 0.9rem 1.6rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--kr-bg);
+      background: var(--kr-accent);
+      border: 1px solid var(--kr-accent);
+      border-radius: 999px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 180ms var(--kr-ease),
+                  border-color 180ms var(--kr-ease),
+                  transform 180ms var(--kr-ease);
+    }
+    .kairos-roi__cta-btn:hover,
+    .kairos-roi__cta-btn:focus {
+      background: var(--kr-accent-2);
+      border-color: var(--kr-accent-2);
+      transform: translateY(-1px);
+      outline: none;
+    }
+    .kairos-roi__cta-btn:focus-visible {
+      box-shadow: 0 0 0 3px rgba(201,169,110,0.35);
+    }
+  </style>
+
+  <!-- =========================================================
+       MARKUP
+       ========================================================= -->
+  <header class="kairos-roi__header">
+    <h2 id="kairos-roi-title" class="kairos-roi__title">
+      ¿Cuánto te devuelve un <em>Activo Kairos</em>?
+    </h2>
+    <p class="kairos-roi__subtitle">
+      Calcula las <strong>horas que tu equipo recupera</strong> gracias a un Activo Kairos.
+      No medimos costes evitados: medimos <em>capacidad productiva liberada</em>
+      que puedes reinvertir en hacer crecer tu negocio.
+    </p>
+  </header>
+
+  <form class="kairos-roi__form" novalidate aria-describedby="kairos-roi-title">
+
+    <!-- Input 1: minutos por persona y semana -->
+    <div class="kairos-roi__field">
+      <label class="kairos-roi__label" for="kr-minutos">
+        Minutos ahorrados por persona y semana
+      </label>
+      <input
+        class="kairos-roi__input"
+        id="kr-minutos"
+        name="minutos"
+        type="number"
+        inputmode="numeric"
+        min="0"
+        step="1"
+        placeholder="Ej. 120"
+        aria-required="true"
+        aria-describedby="kr-minutos-hint"
+      />
+      <span id="kr-minutos-hint" class="kairos-roi__hint">
+        Tiempo que cada persona deja de invertir en la tarea, semanalmente.
+      </span>
+    </div>
+
+    <!-- Input 2: nº de personas -->
+    <div class="kairos-roi__field">
+      <label class="kairos-roi__label" for="kr-personas">
+        Número de personas afectadas
+      </label>
+      <input
+        class="kairos-roi__input"
+        id="kr-personas"
+        name="personas"
+        type="number"
+        inputmode="numeric"
+        min="0"
+        step="1"
+        placeholder="Ej. 4"
+        aria-required="true"
+        aria-describedby="kr-personas-hint"
+      />
+      <span id="kr-personas-hint" class="kairos-roi__hint">
+        Personas del equipo que se benefician del Activo Kairos.
+      </span>
+    </div>
+
+    <!-- Input 3: €/hora (OPCIONAL) -->
+    <div class="kairos-roi__field kairos-roi__field--full">
+      <label class="kairos-roi__label" for="kr-eurohora">
+        €/hora del equipo <span class="kairos-roi__hint">(opcional)</span>
+      </label>
+      <input
+        class="kairos-roi__input"
+        id="kr-eurohora"
+        name="eurohora"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="Déjalo vacío si no quieres ver el equivalente en €"
+        aria-describedby="kr-eurohora-hint"
+      />
+      <span id="kr-eurohora-hint" class="kairos-roi__hint">
+        Si lo rellenas, verás también la capacidad productiva liberada en euros.
+      </span>
+    </div>
+
+  </form>
+
+  <!-- =========================================================
+       RESULTADOS  (recálculo en vivo, aria-live)
+       ========================================================= -->
+  <section
+    class="kairos-roi__results"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+
+    <article class="kairos-roi__card kairos-roi__card--accent">
+      <p class="kairos-roi__card-label">Horas liberadas a la semana</p>
+      <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-semana">0</p>
+      <p class="kairos-roi__card-unit">horas / semana</p>
+    </article>
+
+    <article class="kairos-roi__card kairos-roi__card--accent">
+      <p class="kairos-roi__card-label">Horas liberadas al año</p>
+      <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-anio">0</p>
+      <p class="kairos-roi__card-unit">horas / año (48 semanas laborables)</p>
+    </article>
+
+    <!-- Bloque € — solo visible si €/hora rellenado -->
+    <article class="kairos-roi__money" id="kr-money" data-visible="false">
+      <p class="kairos-roi__card-label">Capacidad productiva liberada al año</p>
+      <p class="kairos-roi__card-value" id="kr-out-euros">0 €</p>
+      <p class="kairos-roi__money-copy">
+        Estas son horas que tu equipo puede reinvertir en generar más ingresos
+        gracias al Activo Kairos.
+      </p>
+    </article>
+
+  </section>
+
+  <!-- =========================================================
+       CTA
+       ========================================================= -->
+  <footer class="kairos-roi__cta">
+    <p class="kairos-roi__cta-text">
+      Esto es solo el ahorro de horas. El ROI completo de un Activo Kairos
+      incluye también <strong>capacidad, calidad y escalabilidad</strong>.
+      ¿Hablamos?
+    </p>
+    <a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">
+      Hablemos
+    </a>
+  </footer>
+
+  <!-- =========================================================
+       LÓGICA  (JS vanilla, sin dependencias)
+       ========================================================= -->
+  <script>
+    (function () {
+      // Constantes de cálculo
+      var SEMANAS_LABORABLES_AL_ANIO = 48;
+
+      // Referencias a inputs
+      var inputMinutos  = document.getElementById('kr-minutos');
+      var inputPersonas = document.getElementById('kr-personas');
+      var inputEuroHora = document.getElementById('kr-eurohora');
+
+      // Referencias a outputs
+      var outSemana = document.getElementById('kr-out-semana');
+      var outAnio   = document.getElementById('kr-out-anio');
+      var outEuros  = document.getElementById('kr-out-euros');
+      var moneyBox  = document.getElementById('kr-money');
+
+      // Formateadores locales (es-ES)
+      var fmtNum = new Intl.NumberFormat('es-ES', {
+        maximumFractionDigits: 1
+      });
+      var fmtInt = new Intl.NumberFormat('es-ES', {
+        maximumFractionDigits: 0
+      });
+      var fmtEur = new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0
+      });
+
+      // Lee un input numérico de forma segura.
+      // Devuelve null si está vacío o no es un número válido.
+      function leerNumero(el) {
+        var v = (el.value || '').replace(',', '.').trim();
+        if (v === '') return null;
+        var n = parseFloat(v);
+        if (isNaN(n) || n < 0) return null;
+        return n;
+      }
+
+      // Aplica una animación sutil de "pulso" al recalcular
+      function pulse(el) {
+        el.classList.remove('kairos-roi__pulse');
+        // Forzar reflow para reiniciar la animación
+        void el.offsetWidth;
+        el.classList.add('kairos-roi__pulse');
+      }
+
+      // Recálculo en vivo
+      function recalcular() {
+        var minutos  = leerNumero(inputMinutos);
+        var personas = leerNumero(inputPersonas);
+        var euroHora = leerNumero(inputEuroHora);
+
+        // Horas liberadas
+        var horasSemana = 0;
+        var horasAnio   = 0;
+        if (minutos !== null && personas !== null) {
+          horasSemana = (minutos * personas) / 60;
+          horasAnio   = horasSemana * SEMANAS_LABORABLES_AL_ANIO;
+        }
+
+        outSemana.textContent = fmtNum.format(horasSemana);
+        outAnio.textContent   = fmtInt.format(horasAnio);
+        pulse(outSemana);
+        pulse(outAnio);
+
+        // Bloque € — solo si €/hora rellenado y > 0
+        if (euroHora !== null && euroHora > 0) {
+          var euros = horasAnio * euroHora;
+          outEuros.textContent = fmtEur.format(euros);
+          moneyBox.setAttribute('data-visible', 'true');
+          pulse(outEuros);
+        } else {
+          moneyBox.setAttribute('data-visible', 'false');
+          outEuros.textContent = '0 €';
+        }
+      }
+
+      // Listeners en vivo (input = cada pulsación)
+      [inputMinutos, inputPersonas, inputEuroHora].forEach(function (el) {
+        el.addEventListener('input', recalcular);
+        el.addEventListener('change', recalcular);
+      });
+
+      // Cálculo inicial (estado vacío)
+      recalcular();
+    })();
+  </script>
+
+</div>

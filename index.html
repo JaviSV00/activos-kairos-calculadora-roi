@@ -1,8 +1,10 @@
 <!-- =========================================================
-     CALCULADORA ROI — ACTIVOS KAIROS (App Sencilla · v5)
-     · Sync perfecto bolita ↔ track ↔ burbuja (sin transición)
-     · Sliders en 2 columnas
-     · Iteración como <details> colapsable
+     CALCULADORA ROI — ACTIVOS KAIROS (App Sencilla · v6)
+     · H1 + brand más visible, iteration title compacto
+     · Subtítulo full-width y más directo
+     · Callouts limpios sin etiqueta
+     · Override numérico (click en el valor para teclearlo)
+     · Logo con fallback SVG si falla la PNG
      ========================================================= -->
 
 <!-- ============================================================
@@ -31,16 +33,15 @@
   }
 </style>
 
-<div class="kairos-roi" role="region" aria-labelledby="kairos-roi-title">
+<div class="kairos-roi" role="region" aria-labelledby="kairos-roi-h1">
 
   <style>
     /* =========================================================
-       VARIABLES DE ESTILO
+       VARIABLES
        ========================================================= */
     .kairos-roi {
       --kr-bg:        #191919;
       --kr-surface:   #1f1f1f;
-      --kr-surface-2: #242424;
       --kr-text:      #FFFFFF;
       --kr-text-soft: #d6d6d6;
       --kr-muted:     #8a8a8a;
@@ -54,9 +55,10 @@
       --kr-font-body:    'Noto Sans JP', -apple-system, BlinkMacSystemFont,
                          'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-      --kr-fs-title: clamp(1.6rem, 2.2vw + 1rem, 2.4rem);
+      --kr-fs-h1:    clamp(1.7rem, 1.8vw + 1.1rem, 2.3rem);
+      --kr-fs-iter:  clamp(1.05rem, 0.7vw + 0.95rem, 1.35rem);
       --kr-fs-sub:   clamp(0.95rem, 0.4vw + 0.85rem, 1.05rem);
-      --kr-fs-out:   clamp(2rem,   2.8vw + 1rem, 3.2rem);
+      --kr-fs-out:   clamp(2.2rem, 3vw + 1rem, 3.4rem);
 
       --kr-radius:      22px;
       --kr-radius-sm:   14px;
@@ -119,36 +121,65 @@
       .kairos-roi::before { animation: none; }
     }
 
-    /* ========== BRAND ========== */
-    .kairos-roi__brand {
-      display: flex; align-items: center; gap: 0.85rem;
-      margin-bottom: 1.75rem;
+    /* ========== HEADER (BRAND + H1) ========== */
+    .kairos-roi__header {
+      display: flex; flex-direction: column;
+      gap: 1rem; margin-bottom: 2rem;
     }
-    .kairos-roi__brand img { height: 40px; width: auto; display: block; }
+    .kairos-roi__brand {
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .kairos-roi__logo {
+      position: relative;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      width: 56px; height: 56px;
+      flex-shrink: 0;
+    }
+    .kairos-roi__logo-img {
+      display: block;
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+    .kairos-roi__logo-svg { display: none; }
+    .kairos-roi__logo--fallback .kairos-roi__logo-svg { display: block; }
+    .kairos-roi__logo--fallback .kairos-roi__logo-img { display: none; }
+
     .kairos-roi__brand-name {
       font-family: var(--kr-font-display);
-      font-weight: 700; letter-spacing: 0.02em;
-      font-size: 0.95rem; color: var(--kr-text);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      font-size: 1.1rem;
+      color: var(--kr-text);
     }
     .kairos-roi__brand-name span { color: var(--kr-accent); }
+
+    .kairos-roi__h1 {
+      font-family: var(--kr-font-display);
+      font-size: var(--kr-fs-h1);
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0;
+    }
+    .kairos-roi__h1 em {
+      color: var(--kr-accent);
+      font-style: normal;
+    }
 
     /* ========== ITERACIÓN COLAPSABLE ========== */
     .kairos-roi__iter {
       border-top: 1px solid var(--kr-border);
       padding-top: 1.5rem;
-      margin-top: 0;
     }
-    .kairos-roi__iter + .kairos-roi__iter {
-      margin-top: 1.5rem;
-    }
-    .kairos-roi__iter[open] {
-      padding-bottom: 0.5rem;
-    }
+    .kairos-roi__iter + .kairos-roi__iter { margin-top: 1.5rem; }
+    .kairos-roi__iter[open] { padding-bottom: 0.5rem; }
+
     .kairos-roi__iter > summary {
       list-style: none;
       cursor: pointer;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 1rem;
       padding: 0.25rem 0;
@@ -164,10 +195,10 @@
     }
     .kairos-roi__title {
       font-family: var(--kr-font-display);
-      font-size: var(--kr-fs-title);
-      font-weight: 900;
-      letter-spacing: -0.025em;
-      line-height: 1.08;
+      font-size: var(--kr-fs-iter);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
       margin: 0;
       flex: 1;
     }
@@ -193,15 +224,14 @@
       color: var(--kr-accent);
       background: rgba(249,99,2,0.08);
     }
-    .kairos-roi__iter-body {
-      padding-top: 1.25rem;
-    }
+    .kairos-roi__iter-body { padding-top: 1.25rem; }
 
     .kairos-roi__subtitle {
       font-family: var(--kr-font-body);
       font-size: var(--kr-fs-sub);
       color: var(--kr-text-soft);
-      margin: 0 0 2rem 0; max-width: 60ch;
+      margin: 0 0 2rem 0;
+      /* full width: sin max-width que lo estrangule */
     }
     .kairos-roi__subtitle strong { color: var(--kr-text); font-weight: 700; }
 
@@ -209,7 +239,7 @@
     .kairos-roi__form {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 1.75rem 1.75rem;
+      gap: 1.75rem;
       margin-bottom: 2.25rem;
     }
     @media (min-width: 640px) {
@@ -232,21 +262,42 @@
     .kairos-roi__hint {
       font-family: var(--kr-font-display);
       font-size: 0.78rem; color: var(--kr-muted);
-      font-weight: 400; letter-spacing: 0;
+      font-weight: 400;
       margin-top: 0.15rem;
     }
+
+    /* Valor grande naranja — editable on click */
     .kairos-roi__current {
       font-family: var(--kr-font-display);
       font-size: 1.4rem; font-weight: 900;
       color: var(--kr-accent); letter-spacing: -0.025em;
       line-height: 1; white-space: nowrap;
       font-variant-numeric: tabular-nums;
+      display: inline-flex; align-items: baseline;
+    }
+    .kairos-roi__current-num {
+      cursor: text;
+      padding: 2px 4px;
+      margin: -2px -4px;
+      border-radius: 6px;
+      transition: background 160ms var(--kr-ease),
+                  box-shadow 160ms var(--kr-ease);
+      min-width: 1ch;
+      outline: none;
+    }
+    .kairos-roi__current-num:hover {
+      background: rgba(249,99,2,0.10);
+      box-shadow: inset 0 -2px 0 rgba(249,99,2,0.45);
+    }
+    .kairos-roi__current-num.is-editing {
+      background: rgba(249,99,2,0.12);
+      box-shadow: 0 0 0 2px var(--kr-accent);
+      caret-color: var(--kr-accent);
     }
     .kairos-roi__current-unit {
       font-family: var(--kr-font-display);
       font-size: 0.75rem; color: var(--kr-muted);
       font-weight: 500; margin-left: 0.3rem;
-      letter-spacing: 0;
     }
 
     /* Wrapper del slider */
@@ -255,11 +306,10 @@
       padding: 26px 0 8px 0;
     }
 
-    /* Burbuja flotante — SIN transición horizontal para sync 1:1 con el thumb */
+    /* Burbuja flotante — SIN transición horizontal: sync 1:1 con el thumb */
     .kairos-roi__bubble {
       position: absolute;
-      bottom: 100%;
-      left: 0;
+      bottom: 100%; left: 0;
       transform: translate(-50%, 6px);
       background: var(--kr-accent);
       color: #0a0a0a;
@@ -270,7 +320,6 @@
       border-radius: 999px;
       pointer-events: none;
       opacity: 0;
-      /* Solo transición en opacidad y vertical; horizontal va sin transición */
       transition: opacity 160ms var(--kr-ease),
                   transform 160ms var(--kr-ease);
       box-shadow: 0 6px 16px rgba(249,99,2,0.45);
@@ -292,18 +341,14 @@
       transform: translate(-50%, 0);
     }
 
-    /* Input range — SIN transición en --kr-fill: sync exacto con el thumb */
+    /* Input range — SIN transición en --kr-fill */
     .kairos-roi__slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: var(--kr-thumb-size);
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: var(--kr-thumb-size);
       background: transparent;
-      cursor: pointer;
-      margin: 0;
+      cursor: pointer; margin: 0;
       position: relative;
     }
-    /* Track WebKit */
     .kairos-roi__slider::-webkit-slider-runnable-track {
       height: var(--kr-track-h);
       border-radius: 999px;
@@ -321,9 +366,8 @@
       background: var(--kr-accent);
       border: 4px solid var(--kr-bg);
       margin-top: calc((var(--kr-track-h) - var(--kr-thumb-size)) / 2);
-      box-shadow:
-        0 4px 14px rgba(249,99,2,0.45),
-        0 0 0 0 rgba(249,99,2,0.20);
+      box-shadow: 0 4px 14px rgba(249,99,2,0.45),
+                  0 0 0 0 rgba(249,99,2,0.20);
       transition: transform 160ms var(--kr-ease),
                   box-shadow 160ms var(--kr-ease);
     }
@@ -338,7 +382,6 @@
     .kairos-roi__slider:focus-visible::-webkit-slider-thumb {
       box-shadow: 0 4px 14px rgba(249,99,2,0.45), 0 0 0 6px rgba(249,99,2,0.35);
     }
-    /* Firefox */
     .kairos-roi__slider::-moz-range-track {
       height: var(--kr-track-h);
       border-radius: 999px;
@@ -362,7 +405,6 @@
     .kairos-roi__slider:active::-moz-range-thumb { transform: scale(1.22); }
     .kairos-roi__slider:focus { outline: none; }
 
-    /* Marcas min/max */
     .kairos-roi__scale {
       display: flex; justify-content: space-between;
       font-family: var(--kr-font-display);
@@ -384,7 +426,6 @@
       font-family: var(--kr-font-display);
       font-weight: 600;
       font-size: 0.88rem;
-      letter-spacing: -0.005em;
       transition: all 180ms var(--kr-ease);
       align-self: flex-start;
       justify-self: start;
@@ -436,7 +477,7 @@
       background: var(--kr-surface);
       border: 1px solid var(--kr-border);
       border-radius: var(--kr-radius-sm);
-      padding: 1.5rem 1.6rem;
+      padding: 1.6rem 1.7rem;
       position: relative;
     }
     .kairos-roi__card--accent {
@@ -451,19 +492,13 @@
       background: var(--kr-accent);
       border-radius: 0 0 6px 0;
     }
-    .kairos-roi__card-label {
-      font-family: var(--kr-font-display);
-      font-size: 0.78rem; font-weight: 600;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--kr-muted); margin: 0 0 0.5rem 0;
-    }
     .kairos-roi__card-value {
       font-family: var(--kr-font-display);
       font-size: var(--kr-fs-out);
       font-weight: 900;
       letter-spacing: -0.035em;
       color: var(--kr-text);
-      line-height: 1.05;
+      line-height: 1;
       margin: 0;
       font-variant-numeric: tabular-nums;
     }
@@ -474,7 +509,7 @@
       font-weight: 500;
       letter-spacing: -0.005em;
       color: var(--kr-text-soft);
-      margin: 0.4rem 0 0 0;
+      margin: 0.5rem 0 0 0;
     }
 
     .kairos-roi__money-result {
@@ -483,7 +518,7 @@
       background: var(--kr-surface);
       border: 1px solid var(--kr-border);
       border-radius: var(--kr-radius-sm);
-      padding: 1.5rem 1.6rem;
+      padding: 1.6rem 1.7rem;
       position: relative;
     }
     .kairos-roi__money-result[data-visible="true"] { display: block; }
@@ -500,7 +535,6 @@
       font-size: 0.95rem;
       color: var(--kr-text-soft);
       margin: 0.7rem 0 0 0;
-      max-width: 60ch;
     }
 
     /* ========== CTA ========== */
@@ -521,7 +555,7 @@
     .kairos-roi__cta-text {
       font-family: var(--kr-font-body);
       font-size: 0.98rem; color: var(--kr-text-soft);
-      margin: 0; max-width: 60ch;
+      margin: 0;
     }
     .kairos-roi__cta-text strong { color: var(--kr-text); font-weight: 700; }
     .kairos-roi__cta-btn {
@@ -561,21 +595,34 @@
   <!-- =========================================================
        MARKUP
        ========================================================= -->
-  <div class="kairos-roi__brand">
-    <img
-      src="https://kairos-cwt-img-wp.m4iwjx.easypanel.host/wp-content/uploads/2025/12/Logo-Kairos-Fondo-Transparente.png"
-      alt="Activos Kairos"
-      loading="lazy"
-      width="40" height="40" />
-    <div class="kairos-roi__brand-name">Activos <span>Kairos</span></div>
-  </div>
+  <header class="kairos-roi__header">
+    <div class="kairos-roi__brand">
+      <span class="kairos-roi__logo" aria-label="Activos Kairos">
+        <img class="kairos-roi__logo-img"
+             src="https://kairos-cwt-img-wp.m4iwjx.easypanel.host/wp-content/uploads/2025/12/Logo-Kairos-Fondo-Transparente.png"
+             alt=""
+             width="56" height="56"
+             loading="lazy"
+             onerror="this.parentElement.classList.add('kairos-roi__logo--fallback');" />
+        <svg class="kairos-roi__logo-svg" viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
+          <text x="50%" y="54%" text-anchor="middle" dominant-baseline="central"
+                font-family="Satoshi, system-ui, sans-serif" font-weight="900"
+                font-size="52" fill="#F96302">K</text>
+        </svg>
+      </span>
+      <div class="kairos-roi__brand-name">Activos <span>Kairos</span></div>
+    </div>
+
+    <h1 id="kairos-roi-h1" class="kairos-roi__h1">
+      Calculadora de Activos <em>Kairos</em>
+    </h1>
+  </header>
 
   <!-- ITERACIÓN 1 — coste de la tarea -->
   <details class="kairos-roi__iter" open>
     <summary>
-      <h2 id="kairos-roi-title" class="kairos-roi__title">
-        ¿Cuánto te cuesta la tarea que tu equipo hace
-        <em>en automático</em>?
+      <h2 class="kairos-roi__title">
+        ¿Cuánto te cuesta la tarea que tu equipo hace <em>en automático</em>?
       </h2>
       <span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
     </summary>
@@ -585,11 +632,10 @@
       <p class="kairos-roi__subtitle">
         Esa tarea que se repite cada semana en tu negocio. La que
         <strong>nadie cuestiona</strong> porque "siempre se ha hecho así".
-        Mueve las bolitas con tus números reales y descubre cuántas horas — y
-        cuántos euros — llevas años regalando sin saberlo.
+        Descubre cuántas horas — y cuántos euros — estás regalando sin saberlo.
       </p>
 
-      <form class="kairos-roi__form" novalidate aria-describedby="kairos-roi-title">
+      <form class="kairos-roi__form" novalidate aria-describedby="kairos-roi-h1">
 
         <!-- Slider 1 -->
         <div class="kairos-roi__field">
@@ -601,7 +647,9 @@
               <div class="kairos-roi__hint">Tiempo total a la semana, sumando todas las veces.</div>
             </div>
             <div class="kairos-roi__current">
-              <span id="kr-minutos-display">0</span><span class="kairos-roi__current-unit">min/sem</span>
+              <span id="kr-minutos-display" class="kairos-roi__current-num"
+                    data-slider-id="kr-minutos" tabindex="0"
+                    role="spinbutton" aria-label="Editar minutos">0</span><span class="kairos-roi__current-unit">min/sem</span>
             </div>
           </div>
           <div class="kairos-roi__slider-wrap" data-slider="minutos">
@@ -629,7 +677,9 @@
               <div class="kairos-roi__hint">Incluye a quien la supervisa, revisa o corrige.</div>
             </div>
             <div class="kairos-roi__current">
-              <span id="kr-personas-display">0</span><span class="kairos-roi__current-unit">personas</span>
+              <span id="kr-personas-display" class="kairos-roi__current-num"
+                    data-slider-id="kr-personas" tabindex="0"
+                    role="spinbutton" aria-label="Editar personas">0</span><span class="kairos-roi__current-unit">personas</span>
             </div>
           </div>
           <div class="kairos-roi__slider-wrap" data-slider="personas">
@@ -671,7 +721,9 @@
               <div class="kairos-roi__hint">Coste medio por hora trabajada (bruto).</div>
             </div>
             <div class="kairos-roi__current">
-              <span id="kr-eurohora-display">0</span><span class="kairos-roi__current-unit">€/hora</span>
+              <span id="kr-eurohora-display" class="kairos-roi__current-num"
+                    data-slider-id="kr-eurohora" tabindex="0"
+                    role="spinbutton" aria-label="Editar euros por hora">0</span><span class="kairos-roi__current-unit">€/hora</span>
             </div>
           </div>
           <div class="kairos-roi__slider-wrap" data-slider="eurohora">
@@ -695,20 +747,18 @@
       <section class="kairos-roi__results" aria-live="polite" aria-atomic="true">
 
         <article class="kairos-roi__card kairos-roi__card--accent">
-          <p class="kairos-roi__card-label">Horas que regalas a la semana</p>
           <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-semana">0</p>
-          <p class="kairos-roi__card-unit">horas / semana</p>
+          <p class="kairos-roi__card-unit">horas / semana regaladas</p>
         </article>
 
         <article class="kairos-roi__card kairos-roi__card--accent">
-          <p class="kairos-roi__card-label">Horas que regalas al año</p>
           <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-anio">0</p>
-          <p class="kairos-roi__card-unit">horas / año (48 semanas laborables)</p>
+          <p class="kairos-roi__card-unit">horas / año regaladas (48 semanas laborables)</p>
         </article>
 
         <article class="kairos-roi__money-result" id="kr-money" data-visible="false">
-          <p class="kairos-roi__card-label">Lo que esa tarea te cuesta cada año</p>
           <p class="kairos-roi__card-value" id="kr-out-euros">0 €</p>
+          <p class="kairos-roi__card-unit">regalados cada año en esa tarea</p>
           <p class="kairos-roi__money-copy">
             Esto es lo que llevas años pagando por una tarea que ni genera
             ingresos ni diferencia tu negocio. Y es solo la punta del iceberg.
@@ -724,7 +774,7 @@
           cuellos de botella y todo el tiempo que tu equipo no le dedica a lo que
           de verdad mueve tu negocio. Hablemos.
         </p>
-        <a class="kairos-roi__cta-btn" href="https://tally.so/r/w4LO2d" target="_blank" rel="noopener noreferrer">Hablemos</a>
+        <a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
       </footer>
 
     </div>
@@ -732,16 +782,7 @@
 
   <!-- ============================================================
        AQUÍ IRÁ LA ITERACIÓN 2 (futura):
-       <details class="kairos-roi__iter">
-         <summary>
-           <h2 class="kairos-roi__title">
-             ¿Cuánto tiempo gasta tu equipo <em>buscando información</em>
-             para hacer 1 tarea?
-           </h2>
-           <span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
-         </summary>
-         <div class="kairos-roi__iter-body"> ... </div>
-       </details>
+       ¿Cuánto tiempo gasta tu equipo buscando información para hacer 1 tarea?
        ============================================================ -->
 
   <!-- =========================================================
@@ -782,13 +823,11 @@
         if (max === min) return 0;
         return ((val - min) / (max - min)) * 100;
       }
-
       function paintSlider(slider) {
         var pct = pctSlider(slider);
         slider.style.setProperty('--kr-fill', pct.toFixed(3));
         slider.setAttribute('aria-valuenow', slider.value);
       }
-
       function positionBubble(slider, bubble) {
         var min = parseFloat(slider.min);
         var max = parseFloat(slider.max);
@@ -828,9 +867,10 @@
         var euroHora = parseFloat(slEur.value) || 0;
         var moneyOn  = moneyToggle.getAttribute('aria-pressed') === 'true';
 
-        dspMin.textContent = fmtInt.format(minutos);
-        dspPer.textContent = fmtInt.format(personas);
-        dspEur.textContent = fmtInt.format(euroHora);
+        // Solo refrescamos los displays si NO se están editando
+        if (!dspMin.classList.contains('is-editing')) dspMin.textContent = fmtInt.format(minutos);
+        if (!dspPer.classList.contains('is-editing')) dspPer.textContent = fmtInt.format(personas);
+        if (!dspEur.classList.contains('is-editing')) dspEur.textContent = fmtInt.format(euroHora);
 
         document.querySelector('[data-bubble-for="kr-minutos"]').textContent  = fmtInt.format(minutos);
         document.querySelector('[data-bubble-for="kr-personas"]').textContent = fmtInt.format(personas);
@@ -878,9 +918,72 @@
         update();
       }
 
+      // ========== Override numérico: click sobre el valor para escribirlo ==========
+      function bindEditable(displaySpan, slider) {
+        function startEdit() {
+          if (displaySpan.classList.contains('is-editing')) return;
+          displaySpan.classList.add('is-editing');
+          displaySpan.contentEditable = 'plaintext-only';
+          displaySpan.textContent = slider.value; // valor crudo (sin formato es-ES)
+          // Selecciona todo
+          var range = document.createRange();
+          range.selectNodeContents(displaySpan);
+          var sel = window.getSelection();
+          sel.removeAllRanges(); sel.addRange(range);
+          displaySpan.focus();
+        }
+        function commit() {
+          if (!displaySpan.classList.contains('is-editing')) return;
+          var raw = (displaySpan.textContent || '').replace(/[^\d.-]/g, '');
+          var v = parseFloat(raw);
+          if (isNaN(v)) v = parseFloat(slider.value) || 0;
+          var min = parseFloat(slider.min);
+          var max = parseFloat(slider.max);
+          v = Math.max(min, Math.min(max, Math.round(v)));
+          displaySpan.classList.remove('is-editing');
+          displaySpan.contentEditable = 'false';
+          slider.value = v;
+          slider.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        function cancel() {
+          if (!displaySpan.classList.contains('is-editing')) return;
+          displaySpan.classList.remove('is-editing');
+          displaySpan.contentEditable = 'false';
+          // Repinta valor actual con formato es-ES
+          slider.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        displaySpan.addEventListener('click', startEdit);
+        displaySpan.addEventListener('keydown', function (e) {
+          // Si NO está en edición, Enter o Espacio inician edición (accesibilidad)
+          if (!displaySpan.classList.contains('is-editing')) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              startEdit();
+            }
+            return;
+          }
+          // En edición:
+          if (e.key === 'Enter') { e.preventDefault(); commit(); }
+          else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+        });
+        displaySpan.addEventListener('blur', commit);
+        // Bloquea pegar contenido raro
+        displaySpan.addEventListener('paste', function (e) {
+          e.preventDefault();
+          var text = (e.clipboardData || window.clipboardData).getData('text');
+          var clean = text.replace(/[^\d.-]/g, '');
+          document.execCommand('insertText', false, clean);
+        });
+      }
+
       bindSlider(slMin);
       bindSlider(slPer);
       bindSlider(slEur);
+
+      bindEditable(dspMin, slMin);
+      bindEditable(dspPer, slPer);
+      bindEditable(dspEur, slEur);
 
       moneyToggle.addEventListener('click', function () {
         var on = moneyToggle.getAttribute('aria-pressed') === 'true';
@@ -899,8 +1002,6 @@
         recalcular();
       });
 
-      // Recalcular posiciones de burbujas cuando se abre un <details>
-      // (cambia el ancho del slider al desplegarse) y al hacer resize
       function repaintAll() {
         [slMin, slPer, slEur].forEach(function (s) {
           var b = document.querySelector('[data-bubble-for="' + s.id + '"]');

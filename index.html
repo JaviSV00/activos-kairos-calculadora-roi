@@ -1,673 +1,466 @@
 <!-- =========================================================
-     CALCULADORA ROI — ACTIVOS KAIROS (App Sencilla · v6)
-     · H1 + brand más visible, iteration title compacto
-     · Subtítulo full-width y más directo
-     · Callouts limpios sin etiqueta
-     · Override numérico (click en el valor para teclearlo)
-     · Logo con fallback SVG si falla la PNG
+     CALCULADORA ROI — ACTIVOS KAIROS · v7
+     · Motor data-driven (cada iteración se autodescribe)
+     · CALCS + FORMATS registries — listo para iter2
+     · Bugs limpiados, perf optimizada, CSS unificado
      ========================================================= -->
 
-<!-- ============================================================
-     ⚠️ SOLO PARA PREVIEW LOCAL / GITHUB PAGES — ELIMINAR EN WP
-     ============================================================ -->
-<style>
-  html, body { margin: 0; padding: 0; background: #191919; min-height: 100%; }
-</style>
-<!-- ============================================================ -->
+<!-- ⚠️ SOLO PREVIEW LOCAL / GITHUB PAGES — eliminar en WP -->
+<style>html,body{margin:0;padding:0;background:#191919;min-height:100%}</style>
 
-<!-- Fuentes corporativas Kairos -->
+<!-- Fuentes corporativas -->
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet"
-  href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" />
-<link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" />
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" />
 
-<!-- Registro de --kr-fill (sin transición: queremos sync 1:1 con el thumb) -->
 <style>
-  @property --kr-fill {
-    syntax: '<number>';
-    inherits: true;
-    initial-value: 0;
+  /* === @property registrado para que --kr-fill pueda transicionar (lo dejamos sin transition: sync exacto) === */
+  @property --kr-fill { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+  /* ============ VARIABLES ============ */
+  .kairos-roi {
+    --kr-bg:#191919; --kr-surface:#1f1f1f;
+    --kr-text:#fff; --kr-text-soft:#d6d6d6; --kr-muted:#8a8a8a;
+    --kr-accent:#F96302; --kr-accent-2:#ff7a26;
+    --kr-border:#2a2a2a; --kr-border-2:#3a3a3a;
+
+    --kr-font-display:'Satoshi',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --kr-font-body:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+
+    --kr-fs-h1:clamp(1.7rem, 1.8vw + 1.1rem, 2.3rem);
+    --kr-fs-iter:clamp(1.05rem, 0.7vw + 0.95rem, 1.35rem);
+    --kr-fs-sub:clamp(0.95rem, 0.4vw + 0.85rem, 1.05rem);
+    --kr-fs-out:clamp(2.2rem, 3vw + 1rem, 3.4rem);
+
+    --kr-radius:22px; --kr-radius-sm:14px; --kr-radius-pill:999px;
+    --kr-gap:1.25rem; --kr-pad:clamp(1.5rem, 2vw + 0.75rem, 2.75rem);
+    --kr-maxw:920px;
+    --kr-shadow:0 20px 60px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.04) inset;
+
+    --kr-thumb:30px; --kr-track-h:8px;
+    --kr-ease:cubic-bezier(.2,.7,.2,1);
+    --kr-t-fast:160ms; --kr-t-med:220ms;
   }
+  .kairos-roi, .kairos-roi *, .kairos-roi *::before, .kairos-roi *::after { box-sizing:border-box; }
+
+  /* ============ CONTENEDOR ============ */
+  .kairos-roi {
+    font-family:var(--kr-font-display);
+    color:var(--kr-text);
+    background:
+      radial-gradient(circle at 0% 0%, rgba(249,99,2,.10) 0%, transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(249,99,2,.06) 0%, transparent 50%),
+      var(--kr-bg);
+    border:1px solid var(--kr-border);
+    border-radius:var(--kr-radius);
+    padding:var(--kr-pad);
+    max-width:var(--kr-maxw);
+    margin:2.5rem auto;
+    box-shadow:var(--kr-shadow);
+    line-height:1.55;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+  }
+
+  /* Orb atmosférico */
+  .kairos-roi::before {
+    content:""; position:absolute;
+    width:380px; height:380px; border-radius:50%;
+    background:radial-gradient(circle, rgba(249,99,2,.35) 0%, rgba(249,99,2,.10) 40%, transparent 70%);
+    top:-120px; right:-120px; filter:blur(40px);
+    animation:kairos-orb 18s ease-in-out infinite alternate;
+    z-index:-1; pointer-events:none;
+  }
+  @keyframes kairos-orb {
+    0%   { transform:translate(0,0)        scale(1);    opacity:.85; }
+    50%  { transform:translate(-40px,30px) scale(1.08); opacity:1; }
+    100% { transform:translate(20px,60px)  scale(.95);  opacity:.7; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kairos-roi::before { animation:none; }
+  }
+
+  /* ============ HEADER ============ */
+  .kairos-roi__header {
+    display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+    margin-bottom:2rem;
+  }
+  .kairos-roi__logo {
+    position:relative;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:56px; height:56px; flex-shrink:0;
+  }
+  .kairos-roi__logo-img { display:block; width:100%; height:100%; object-fit:contain; }
+  .kairos-roi__logo-svg { display:none; }
+  .kairos-roi__logo--fallback .kairos-roi__logo-img { display:none; }
+  .kairos-roi__logo--fallback .kairos-roi__logo-svg { display:block; }
+
+  .kairos-roi__h1 {
+    font-family:var(--kr-font-display);
+    font-size:var(--kr-fs-h1); font-weight:900;
+    letter-spacing:-.025em; line-height:1.1; margin:0;
+  }
+  .kairos-roi__h1 em { color:var(--kr-accent); font-style:normal; }
+
+  /* ============ ITERACIÓN COLAPSABLE ============ */
+  .kairos-roi__iter { border-top:1px solid var(--kr-border); padding-top:1.5rem; }
+  .kairos-roi__iter + .kairos-roi__iter { margin-top:1.5rem; }
+  .kairos-roi__iter[open] { padding-bottom:.5rem; }
+  .kairos-roi__iter > summary {
+    list-style:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:1rem; padding:.25rem 0; outline:none;
+    transition:opacity 180ms var(--kr-ease);
+  }
+  .kairos-roi__iter > summary::-webkit-details-marker { display:none; }
+  .kairos-roi__iter > summary:hover { opacity:.92; }
+  .kairos-roi__iter > summary:focus-visible {
+    outline:2px solid var(--kr-accent); outline-offset:6px; border-radius:8px;
+  }
+  .kairos-roi__title {
+    font-family:var(--kr-font-display);
+    font-size:var(--kr-fs-iter); font-weight:800;
+    letter-spacing:-.02em; line-height:1.2; margin:0; flex:1;
+  }
+  .kairos-roi__title em { color:var(--kr-accent); font-style:normal; }
+  .kairos-roi__iter-chevron {
+    flex-shrink:0; width:36px; height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:999px; border:1px solid var(--kr-border-2);
+    color:var(--kr-text-soft); font-size:.9rem; line-height:1;
+    transition:transform var(--kr-t-med) var(--kr-ease),
+               border-color var(--kr-t-med) var(--kr-ease),
+               color var(--kr-t-med) var(--kr-ease),
+               background var(--kr-t-med) var(--kr-ease);
+  }
+  .kairos-roi__iter[open] > summary .kairos-roi__iter-chevron {
+    transform:rotate(180deg); border-color:var(--kr-accent);
+    color:var(--kr-accent); background:rgba(249,99,2,.08);
+  }
+
+  /* Stat chip en summary */
+  .kairos-roi__iter-stat {
+    flex-shrink:0;
+    display:inline-flex; align-items:baseline; gap:.3rem;
+    padding:.4rem .8rem;
+    border-radius:999px;
+    background:rgba(249,99,2,.10);
+    border:1px solid rgba(249,99,2,.30);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    transition:background 200ms var(--kr-ease), border-color 200ms var(--kr-ease);
+  }
+  .kairos-roi__iter[open] > summary .kairos-roi__iter-stat {
+    background:transparent; border-color:var(--kr-border-2);
+  }
+  .kairos-roi__iter-stat-num {
+    font-family:var(--kr-font-display); font-weight:900;
+    font-size:1.05rem; color:var(--kr-accent); letter-spacing:-.02em; line-height:1;
+  }
+  .kairos-roi__iter-stat-unit {
+    font-family:var(--kr-font-display); font-size:.72rem;
+    font-weight:600; color:var(--kr-text-soft); letter-spacing:.02em;
+  }
+  @media (max-width:480px) { .kairos-roi__iter-stat { display:none; } }
+
+  .kairos-roi__iter-body { padding-top:1.25rem; }
+  .kairos-roi__subtitle {
+    font-family:var(--kr-font-body); font-size:var(--kr-fs-sub);
+    color:var(--kr-text-soft); margin:0 0 2rem 0;
+  }
+  .kairos-roi__subtitle strong { color:var(--kr-text); font-weight:700; }
+
+  /* ============ FORM (sliders) ============ */
+  .kairos-roi__form {
+    display:grid; grid-template-columns:1fr;
+    gap:1.75rem; margin-bottom:2.25rem;
+  }
+  @media (min-width:640px) {
+    .kairos-roi__form { grid-template-columns:1fr 1fr; }
+    .kairos-roi__field--full { grid-column:1 / -1; }
+  }
+  .kairos-roi__field { display:flex; flex-direction:column; gap:1rem; min-width:0; }
+  .kairos-roi__field-head {
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:.75rem; flex-wrap:wrap;
+  }
+  .kairos-roi__label {
+    font-family:var(--kr-font-display);
+    font-size:.95rem; font-weight:700; color:var(--kr-text); letter-spacing:-.01em;
+  }
+  .kairos-roi__hint {
+    font-family:var(--kr-font-display);
+    font-size:.78rem; color:var(--kr-muted); font-weight:400; margin-top:.15rem;
+  }
+
+  /* Valor grande naranja editable */
+  .kairos-roi__current {
+    font-family:var(--kr-font-display);
+    font-size:1.4rem; font-weight:900; color:var(--kr-accent);
+    letter-spacing:-.025em; line-height:1; white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+    display:inline-flex; align-items:baseline;
+  }
+  .kairos-roi__current-num {
+    cursor:text; padding:2px 4px; margin:-2px -4px;
+    border-radius:6px; min-width:1ch; outline:none;
+    transition:background var(--kr-t-fast) var(--kr-ease),
+               box-shadow var(--kr-t-fast) var(--kr-ease);
+  }
+  .kairos-roi__current-num:hover {
+    background:rgba(249,99,2,.10);
+    box-shadow:inset 0 -2px 0 rgba(249,99,2,.45);
+  }
+  .kairos-roi__current-num.is-editing {
+    background:rgba(249,99,2,.12);
+    box-shadow:0 0 0 2px var(--kr-accent);
+    caret-color:var(--kr-accent);
+  }
+  .kairos-roi__current-unit {
+    font-family:var(--kr-font-display);
+    font-size:.75rem; color:var(--kr-muted); font-weight:500; margin-left:.3rem;
+  }
+
+  .kairos-roi__slider-wrap { position:relative; padding:26px 0 8px 0; }
+
+  /* Burbuja — sin transición horizontal (sync 1:1 con thumb) */
+  .kairos-roi__bubble {
+    position:absolute; bottom:100%; left:0;
+    transform:translate(-50%, 6px);
+    background:var(--kr-accent); color:#0a0a0a;
+    font-family:var(--kr-font-display); font-weight:800; font-size:.78rem;
+    padding:4px 10px; border-radius:999px;
+    pointer-events:none; opacity:0;
+    transition:opacity var(--kr-t-fast) var(--kr-ease),
+               transform var(--kr-t-fast) var(--kr-ease);
+    box-shadow:0 6px 16px rgba(249,99,2,.45);
+    white-space:nowrap;
+  }
+  .kairos-roi__bubble::after {
+    content:""; position:absolute; top:100%; left:50%;
+    transform:translateX(-50%);
+    border:5px solid transparent; border-top-color:var(--kr-accent);
+  }
+  .kairos-roi__slider-wrap:hover .kairos-roi__bubble,
+  .kairos-roi__slider-wrap:focus-within .kairos-roi__bubble,
+  .kairos-roi__slider-wrap[data-active="true"] .kairos-roi__bubble {
+    opacity:1; transform:translate(-50%, 0);
+  }
+
+  /* Input range */
+  .kairos-roi__slider {
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:var(--kr-thumb);
+    background:transparent; cursor:pointer; margin:0; position:relative;
+  }
+  .kairos-roi__slider::-webkit-slider-runnable-track {
+    height:var(--kr-track-h); border-radius:999px;
+    background:linear-gradient(to right,
+      var(--kr-accent) 0%,
+      var(--kr-accent) calc(var(--kr-fill, 0) * 1%),
+      var(--kr-border-2) calc(var(--kr-fill, 0) * 1%),
+      var(--kr-border-2) 100%);
+  }
+  .kairos-roi__slider::-webkit-slider-thumb {
+    -webkit-appearance:none; appearance:none;
+    width:var(--kr-thumb); height:var(--kr-thumb); border-radius:50%;
+    background:var(--kr-accent); border:4px solid var(--kr-bg);
+    margin-top:calc((var(--kr-track-h) - var(--kr-thumb)) / 2);
+    box-shadow:0 4px 14px rgba(249,99,2,.45), 0 0 0 0 rgba(249,99,2,.20);
+    transition:transform var(--kr-t-fast) var(--kr-ease),
+               box-shadow var(--kr-t-fast) var(--kr-ease);
+  }
+  .kairos-roi__slider:hover::-webkit-slider-thumb {
+    transform:scale(1.12);
+    box-shadow:0 6px 18px rgba(249,99,2,.55), 0 0 0 8px rgba(249,99,2,.12);
+  }
+  .kairos-roi__slider:active::-webkit-slider-thumb {
+    transform:scale(1.22);
+    box-shadow:0 6px 20px rgba(249,99,2,.6), 0 0 0 12px rgba(249,99,2,.16);
+  }
+  .kairos-roi__slider:focus-visible::-webkit-slider-thumb {
+    box-shadow:0 4px 14px rgba(249,99,2,.45), 0 0 0 6px rgba(249,99,2,.35);
+  }
+  .kairos-roi__slider::-moz-range-track {
+    height:var(--kr-track-h); border-radius:999px; background:var(--kr-border-2);
+  }
+  .kairos-roi__slider::-moz-range-progress {
+    height:var(--kr-track-h); border-radius:999px; background:var(--kr-accent);
+  }
+  .kairos-roi__slider::-moz-range-thumb {
+    width:var(--kr-thumb); height:var(--kr-thumb); border-radius:50%;
+    background:var(--kr-accent); border:4px solid var(--kr-bg);
+    box-shadow:0 4px 14px rgba(249,99,2,.45);
+    cursor:pointer;
+    transition:transform var(--kr-t-fast) var(--kr-ease);
+  }
+  .kairos-roi__slider:hover::-moz-range-thumb { transform:scale(1.12); }
+  .kairos-roi__slider:active::-moz-range-thumb { transform:scale(1.22); }
+  .kairos-roi__slider:focus { outline:none; }
+
+  .kairos-roi__scale {
+    display:flex; justify-content:space-between;
+    font-family:var(--kr-font-display);
+    font-size:.7rem; font-weight:500; color:var(--kr-muted);
+    margin-top:.35rem; letter-spacing:.02em;
+  }
+
+  /* ============ TOGGLE €/hora ============ */
+  .kairos-roi__toggle {
+    display:inline-flex; align-items:center; gap:.6rem;
+    padding:.55rem 1rem;
+    background:transparent; border:1px solid var(--kr-border-2);
+    color:var(--kr-text-soft); border-radius:999px;
+    cursor:pointer;
+    font-family:var(--kr-font-display); font-weight:600; font-size:.88rem;
+    align-self:flex-start; justify-self:start;
+    transition:background 180ms var(--kr-ease),
+               border-color 180ms var(--kr-ease),
+               color 180ms var(--kr-ease);
+  }
+  .kairos-roi__toggle:hover { border-color:var(--kr-accent); color:var(--kr-text); }
+  .kairos-roi__toggle[aria-pressed="true"] {
+    background:rgba(249,99,2,.12);
+    border-color:var(--kr-accent); color:var(--kr-accent);
+  }
+  .kairos-roi__toggle-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--kr-border-2);
+    transition:background 180ms var(--kr-ease), box-shadow 180ms var(--kr-ease);
+  }
+  .kairos-roi__toggle[aria-pressed="true"] .kairos-roi__toggle-dot {
+    background:var(--kr-accent); box-shadow:0 0 10px rgba(249,99,2,.7);
+  }
+
+  .kairos-roi__field--money { display:none; animation:kairos-fadein 320ms var(--kr-ease); }
+  .kairos-roi__field--money[data-visible="true"] { display:flex; }
+  @keyframes kairos-fadein {
+    from { opacity:0; transform:translateY(-4px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .kairos-roi__field--money { animation:none; } }
+
+  /* ============ RESULTADOS ============ */
+  .kairos-roi__results {
+    display:grid; grid-template-columns:1fr; gap:var(--kr-gap);
+  }
+  @media (min-width:640px) { .kairos-roi__results { grid-template-columns:1fr 1fr; } }
+
+  .kairos-roi__card, .kairos-roi__money-result {
+    background:var(--kr-surface);
+    border:1px solid var(--kr-border);
+    border-radius:var(--kr-radius-sm);
+    padding:1.6rem 1.7rem;
+    position:relative;
+  }
+  .kairos-roi__card--accent {
+    border-color:rgba(249,99,2,.35);
+    background:linear-gradient(180deg, rgba(249,99,2,.10) 0%, var(--kr-surface) 80%);
+  }
+  .kairos-roi__card--accent::before, .kairos-roi__money-result::before {
+    content:""; position:absolute; top:0; left:0;
+    width:38px; height:3px; background:var(--kr-accent);
+    border-radius:0 0 6px 0;
+  }
+  .kairos-roi__money-result::before { opacity:.6; }
+
+  .kairos-roi__card-value {
+    font-family:var(--kr-font-display);
+    font-size:var(--kr-fs-out); font-weight:900;
+    letter-spacing:-.035em; color:var(--kr-text); line-height:1;
+    margin:0; font-variant-numeric:tabular-nums;
+  }
+  .kairos-roi__card-value--accent { color:var(--kr-accent); }
+  .kairos-roi__card-unit {
+    font-family:var(--kr-font-display);
+    font-size:.95rem; font-weight:500;
+    letter-spacing:-.005em; color:var(--kr-text-soft);
+    margin:.5rem 0 0 0;
+  }
+  .kairos-roi__money-result { display:none; grid-column:1 / -1; }
+  .kairos-roi__money-result[data-visible="true"] { display:block; }
+  .kairos-roi__money-copy {
+    font-family:var(--kr-font-body);
+    font-size:.95rem; color:var(--kr-text-soft);
+    margin:.7rem 0 0 0;
+  }
+
+  /* ============ CTA ============ */
+  .kairos-roi__cta {
+    margin-top:2.25rem; padding-top:1.85rem;
+    border-top:1px solid var(--kr-border);
+    display:flex; flex-direction:column; gap:1.1rem; align-items:flex-start;
+  }
+  @media (min-width:640px) {
+    .kairos-roi__cta {
+      flex-direction:row; justify-content:space-between; align-items:center;
+    }
+  }
+  .kairos-roi__cta-text {
+    font-family:var(--kr-font-body); font-size:.98rem;
+    color:var(--kr-text-soft); margin:0;
+  }
+  .kairos-roi__cta-text strong { color:var(--kr-text); font-weight:700; }
+  .kairos-roi__cta-btn {
+    display:inline-flex; align-items:center; gap:.55rem;
+    padding:.95rem 1.7rem;
+    font-family:var(--kr-font-display);
+    font-size:1rem; font-weight:700; letter-spacing:-.01em;
+    color:var(--kr-bg); background:var(--kr-accent);
+    border:1px solid var(--kr-accent); border-radius:var(--kr-radius-pill);
+    text-decoration:none; white-space:nowrap;
+    transition:background 180ms var(--kr-ease),
+               border-color 180ms var(--kr-ease),
+               transform 180ms var(--kr-ease),
+               box-shadow 180ms var(--kr-ease);
+  }
+  .kairos-roi__cta-btn:hover, .kairos-roi__cta-btn:focus {
+    background:var(--kr-accent-2); border-color:var(--kr-accent-2);
+    transform:translateY(-1px);
+    box-shadow:0 8px 24px rgba(249,99,2,.35); outline:none;
+  }
+  .kairos-roi__cta-btn:focus-visible { box-shadow:0 0 0 3px rgba(249,99,2,.45); }
+  .kairos-roi__cta-btn::after { content:"→"; transition:transform 180ms var(--kr-ease); }
+  .kairos-roi__cta-btn:hover::after { transform:translateX(3px); }
 </style>
 
 <div class="kairos-roi" role="region" aria-labelledby="kairos-roi-h1">
 
-  <style>
-    /* =========================================================
-       VARIABLES
-       ========================================================= */
-    .kairos-roi {
-      --kr-bg:        #191919;
-      --kr-surface:   #1f1f1f;
-      --kr-text:      #FFFFFF;
-      --kr-text-soft: #d6d6d6;
-      --kr-muted:     #8a8a8a;
-      --kr-accent:    #F96302;
-      --kr-accent-2:  #ff7a26;
-      --kr-border:    #2a2a2a;
-      --kr-border-2:  #3a3a3a;
-
-      --kr-font-display: 'Satoshi', -apple-system, BlinkMacSystemFont,
-                         'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      --kr-font-body:    'Noto Sans JP', -apple-system, BlinkMacSystemFont,
-                         'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-
-      --kr-fs-h1:    clamp(1.7rem, 1.8vw + 1.1rem, 2.3rem);
-      --kr-fs-iter:  clamp(1.05rem, 0.7vw + 0.95rem, 1.35rem);
-      --kr-fs-sub:   clamp(0.95rem, 0.4vw + 0.85rem, 1.05rem);
-      --kr-fs-out:   clamp(2.2rem, 3vw + 1rem, 3.4rem);
-
-      --kr-radius:      22px;
-      --kr-radius-sm:   14px;
-      --kr-radius-pill: 999px;
-      --kr-gap:         1.25rem;
-      --kr-pad:         clamp(1.5rem, 2vw + 0.75rem, 2.75rem);
-      --kr-maxw:        920px;
-      --kr-shadow:      0 20px 60px rgba(0,0,0,0.45),
-                        0 1px 0 rgba(255,255,255,0.04) inset;
-
-      --kr-thumb-size:  30px;
-      --kr-track-h:     8px;
-
-      --kr-ease: cubic-bezier(.2,.7,.2,1);
-    }
-
-    .kairos-roi * { box-sizing: border-box; }
-
-    .kairos-roi {
-      font-family: var(--kr-font-display);
-      color: var(--kr-text);
-      background:
-        radial-gradient(circle at 0% 0%, rgba(249,99,2,0.10) 0%, transparent 45%),
-        radial-gradient(circle at 100% 100%, rgba(249,99,2,0.06) 0%, transparent 50%),
-        var(--kr-bg);
-      border: 1px solid var(--kr-border);
-      border-radius: var(--kr-radius);
-      padding: var(--kr-pad);
-      max-width: var(--kr-maxw);
-      margin: 2.5rem auto;
-      box-shadow: var(--kr-shadow);
-      line-height: 1.55;
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
-    }
-
-    /* Orb atmosférico */
-    .kairos-roi::before {
-      content: "";
-      position: absolute;
-      width: 380px; height: 380px;
-      border-radius: 50%;
-      background: radial-gradient(circle,
-        rgba(249,99,2,0.35) 0%,
-        rgba(249,99,2,0.10) 40%,
-        transparent 70%);
-      top: -120px; right: -120px;
-      filter: blur(40px);
-      animation: kairos-orb 18s ease-in-out infinite alternate;
-      z-index: -1;
-      pointer-events: none;
-    }
-    @keyframes kairos-orb {
-      0%   { transform: translate(0,0)        scale(1);    opacity: 0.85; }
-      50%  { transform: translate(-40px,30px) scale(1.08); opacity: 1; }
-      100% { transform: translate(20px,60px)  scale(0.95); opacity: 0.7; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .kairos-roi::before { animation: none; }
-    }
-
-    /* ========== HEADER (BRAND + H1) ========== */
-    .kairos-roi__header {
-      display: flex; flex-direction: column;
-      gap: 1rem; margin-bottom: 2rem;
-    }
-    .kairos-roi__brand {
-      display: flex; align-items: center; gap: 1rem;
-    }
-    .kairos-roi__logo {
-      position: relative;
-      display: inline-flex;
-      align-items: center; justify-content: center;
-      width: 56px; height: 56px;
-      flex-shrink: 0;
-    }
-    .kairos-roi__logo-img {
-      display: block;
-      width: 100%; height: 100%;
-      object-fit: contain;
-    }
-    .kairos-roi__logo-svg { display: none; }
-    .kairos-roi__logo--fallback .kairos-roi__logo-svg { display: block; }
-    .kairos-roi__logo--fallback .kairos-roi__logo-img { display: none; }
-
-    .kairos-roi__brand-name {
-      font-family: var(--kr-font-display);
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      font-size: 1.1rem;
-      color: var(--kr-text);
-    }
-    .kairos-roi__brand-name span { color: var(--kr-accent); }
-
-    .kairos-roi__h1 {
-      font-family: var(--kr-font-display);
-      font-size: var(--kr-fs-h1);
-      font-weight: 900;
-      letter-spacing: -0.025em;
-      line-height: 1.1;
-      margin: 0;
-    }
-    .kairos-roi__h1 em {
-      color: var(--kr-accent);
-      font-style: normal;
-    }
-
-    /* ========== ITERACIÓN COLAPSABLE ========== */
-    .kairos-roi__iter {
-      border-top: 1px solid var(--kr-border);
-      padding-top: 1.5rem;
-    }
-    .kairos-roi__iter + .kairos-roi__iter { margin-top: 1.5rem; }
-    .kairos-roi__iter[open] { padding-bottom: 0.5rem; }
-
-    .kairos-roi__iter > summary {
-      list-style: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.25rem 0;
-      outline: none;
-      transition: opacity 180ms var(--kr-ease);
-    }
-    .kairos-roi__iter > summary::-webkit-details-marker { display: none; }
-    .kairos-roi__iter > summary:hover { opacity: 0.92; }
-    .kairos-roi__iter > summary:focus-visible {
-      outline: 2px solid var(--kr-accent);
-      outline-offset: 6px;
-      border-radius: 8px;
-    }
-    .kairos-roi__title {
-      font-family: var(--kr-font-display);
-      font-size: var(--kr-fs-iter);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      margin: 0;
-      flex: 1;
-    }
-    .kairos-roi__title em { color: var(--kr-accent); font-style: normal; }
-    .kairos-roi__iter-chevron {
-      flex-shrink: 0;
-      width: 36px; height: 36px;
-      display: inline-flex;
-      align-items: center; justify-content: center;
-      border-radius: 999px;
-      border: 1px solid var(--kr-border-2);
-      color: var(--kr-text-soft);
-      font-size: 0.9rem;
-      line-height: 1;
-      transition: transform 220ms var(--kr-ease),
-                  border-color 220ms var(--kr-ease),
-                  color 220ms var(--kr-ease),
-                  background 220ms var(--kr-ease);
-    }
-     .kairos-roi__iter-stat {
-       flex-shrink: 0;
-       display: inline-flex;
-       align-items: baseline;
-       gap: 0.3rem;
-       padding: 0.4rem 0.8rem;
-       border-radius: 999px;
-       background: rgba(249,99,2,0.10);
-       border: 1px solid rgba(249,99,2,0.30);
-       font-variant-numeric: tabular-nums;
-       white-space: nowrap;
-       transition: background 200ms var(--kr-ease),
-                   border-color 200ms var(--kr-ease);
-     }
-     .kairos-roi__iter[open] > summary .kairos-roi__iter-stat {
-       /* cuando está desplegado, el dato ya está dentro: lo difuminamos un poco */
-       background: transparent;
-       border-color: var(--kr-border-2);
-     }
-     .kairos-roi__iter-stat-num {
-       font-family: var(--kr-font-display);
-       font-weight: 900;
-       font-size: 1.05rem;
-       color: var(--kr-accent);
-       letter-spacing: -0.02em;
-       line-height: 1;
-     }
-     .kairos-roi__iter-stat-unit {
-       font-family: var(--kr-font-display);
-       font-size: 0.72rem;
-       font-weight: 600;
-       color: var(--kr-text-soft);
-       letter-spacing: 0.02em;
-     }
-     @media (max-width: 480px) {
-       /* en móvil estrecho lo ocultamos para no apretar el header */
-       .kairos-roi__iter-stat { display: none; }
-     }
-    .kairos-roi__iter[open] > summary .kairos-roi__iter-chevron {
-      transform: rotate(180deg);
-      border-color: var(--kr-accent);
-      color: var(--kr-accent);
-      background: rgba(249,99,2,0.08);
-    }
-    .kairos-roi__iter-body { padding-top: 1.25rem; }
-
-    .kairos-roi__subtitle {
-      font-family: var(--kr-font-body);
-      font-size: var(--kr-fs-sub);
-      color: var(--kr-text-soft);
-      margin: 0 0 2rem 0;
-      /* full width: sin max-width que lo estrangule */
-    }
-    .kairos-roi__subtitle strong { color: var(--kr-text); font-weight: 700; }
-
-    /* ========== SLIDERS — 2 COLUMNAS ========== */
-    .kairos-roi__form {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.75rem;
-      margin-bottom: 2.25rem;
-    }
-    @media (min-width: 640px) {
-      .kairos-roi__form { grid-template-columns: 1fr 1fr; }
-      .kairos-roi__field--full { grid-column: 1 / -1; }
-    }
-
-    .kairos-roi__field { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
-
-    .kairos-roi__field-head {
-      display: flex; align-items: baseline;
-      justify-content: space-between;
-      gap: 0.75rem; flex-wrap: wrap;
-    }
-    .kairos-roi__label {
-      font-family: var(--kr-font-display);
-      font-size: 0.95rem; font-weight: 700;
-      color: var(--kr-text); letter-spacing: -0.01em;
-    }
-    .kairos-roi__hint {
-      font-family: var(--kr-font-display);
-      font-size: 0.78rem; color: var(--kr-muted);
-      font-weight: 400;
-      margin-top: 0.15rem;
-    }
-
-    /* Valor grande naranja — editable on click */
-    .kairos-roi__current {
-      font-family: var(--kr-font-display);
-      font-size: 1.4rem; font-weight: 900;
-      color: var(--kr-accent); letter-spacing: -0.025em;
-      line-height: 1; white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-      display: inline-flex; align-items: baseline;
-    }
-    .kairos-roi__current-num {
-      cursor: text;
-      padding: 2px 4px;
-      margin: -2px -4px;
-      border-radius: 6px;
-      transition: background 160ms var(--kr-ease),
-                  box-shadow 160ms var(--kr-ease);
-      min-width: 1ch;
-      outline: none;
-    }
-    .kairos-roi__current-num:hover {
-      background: rgba(249,99,2,0.10);
-      box-shadow: inset 0 -2px 0 rgba(249,99,2,0.45);
-    }
-    .kairos-roi__current-num.is-editing {
-      background: rgba(249,99,2,0.12);
-      box-shadow: 0 0 0 2px var(--kr-accent);
-      caret-color: var(--kr-accent);
-    }
-    .kairos-roi__current-unit {
-      font-family: var(--kr-font-display);
-      font-size: 0.75rem; color: var(--kr-muted);
-      font-weight: 500; margin-left: 0.3rem;
-    }
-
-    /* Wrapper del slider */
-    .kairos-roi__slider-wrap {
-      position: relative;
-      padding: 26px 0 8px 0;
-    }
-
-    /* Burbuja flotante — SIN transición horizontal: sync 1:1 con el thumb */
-    .kairos-roi__bubble {
-      position: absolute;
-      bottom: 100%; left: 0;
-      transform: translate(-50%, 6px);
-      background: var(--kr-accent);
-      color: #0a0a0a;
-      font-family: var(--kr-font-display);
-      font-weight: 800;
-      font-size: 0.78rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 160ms var(--kr-ease),
-                  transform 160ms var(--kr-ease);
-      box-shadow: 0 6px 16px rgba(249,99,2,0.45);
-      white-space: nowrap;
-      will-change: left;
-    }
-    .kairos-roi__bubble::after {
-      content: "";
-      position: absolute;
-      top: 100%; left: 50%;
-      transform: translateX(-50%);
-      border: 5px solid transparent;
-      border-top-color: var(--kr-accent);
-    }
-    .kairos-roi__slider-wrap:hover .kairos-roi__bubble,
-    .kairos-roi__slider-wrap:focus-within .kairos-roi__bubble,
-    .kairos-roi__slider-wrap[data-active="true"] .kairos-roi__bubble {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    /* Input range — SIN transición en --kr-fill */
-    .kairos-roi__slider {
-      -webkit-appearance: none; appearance: none;
-      width: 100%; height: var(--kr-thumb-size);
-      background: transparent;
-      cursor: pointer; margin: 0;
-      position: relative;
-    }
-    .kairos-roi__slider::-webkit-slider-runnable-track {
-      height: var(--kr-track-h);
-      border-radius: 999px;
-      background:
-        linear-gradient(to right,
-          var(--kr-accent) 0%,
-          var(--kr-accent) calc(var(--kr-fill, 0) * 1%),
-          var(--kr-border-2) calc(var(--kr-fill, 0) * 1%),
-          var(--kr-border-2) 100%);
-    }
-    .kairos-roi__slider::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: var(--kr-thumb-size); height: var(--kr-thumb-size);
-      border-radius: 50%;
-      background: var(--kr-accent);
-      border: 4px solid var(--kr-bg);
-      margin-top: calc((var(--kr-track-h) - var(--kr-thumb-size)) / 2);
-      box-shadow: 0 4px 14px rgba(249,99,2,0.45),
-                  0 0 0 0 rgba(249,99,2,0.20);
-      transition: transform 160ms var(--kr-ease),
-                  box-shadow 160ms var(--kr-ease);
-    }
-    .kairos-roi__slider:hover::-webkit-slider-thumb {
-      transform: scale(1.12);
-      box-shadow: 0 6px 18px rgba(249,99,2,0.55), 0 0 0 8px rgba(249,99,2,0.12);
-    }
-    .kairos-roi__slider:active::-webkit-slider-thumb {
-      transform: scale(1.22);
-      box-shadow: 0 6px 20px rgba(249,99,2,0.6), 0 0 0 12px rgba(249,99,2,0.16);
-    }
-    .kairos-roi__slider:focus-visible::-webkit-slider-thumb {
-      box-shadow: 0 4px 14px rgba(249,99,2,0.45), 0 0 0 6px rgba(249,99,2,0.35);
-    }
-    .kairos-roi__slider::-moz-range-track {
-      height: var(--kr-track-h);
-      border-radius: 999px;
-      background: var(--kr-border-2);
-    }
-    .kairos-roi__slider::-moz-range-progress {
-      height: var(--kr-track-h);
-      border-radius: 999px;
-      background: var(--kr-accent);
-    }
-    .kairos-roi__slider::-moz-range-thumb {
-      width: var(--kr-thumb-size); height: var(--kr-thumb-size);
-      border-radius: 50%;
-      background: var(--kr-accent);
-      border: 4px solid var(--kr-bg);
-      box-shadow: 0 4px 14px rgba(249,99,2,0.45);
-      cursor: pointer;
-      transition: transform 160ms var(--kr-ease);
-    }
-    .kairos-roi__slider:hover::-moz-range-thumb { transform: scale(1.12); }
-    .kairos-roi__slider:active::-moz-range-thumb { transform: scale(1.22); }
-    .kairos-roi__slider:focus { outline: none; }
-
-    .kairos-roi__scale {
-      display: flex; justify-content: space-between;
-      font-family: var(--kr-font-display);
-      font-size: 0.7rem; font-weight: 500;
-      color: var(--kr-muted);
-      margin-top: 0.35rem;
-      letter-spacing: 0.02em;
-    }
-
-    /* ========== TOGGLE €/hora ========== */
-    .kairos-roi__toggle {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      padding: 0.55rem 1rem;
-      background: transparent;
-      border: 1px solid var(--kr-border-2);
-      color: var(--kr-text-soft);
-      border-radius: 999px;
-      cursor: pointer;
-      font-family: var(--kr-font-display);
-      font-weight: 600;
-      font-size: 0.88rem;
-      transition: all 180ms var(--kr-ease);
-      align-self: flex-start;
-      justify-self: start;
-    }
-    .kairos-roi__toggle:hover {
-      border-color: var(--kr-accent);
-      color: var(--kr-text);
-    }
-    .kairos-roi__toggle[aria-pressed="true"] {
-      background: rgba(249,99,2,0.12);
-      border-color: var(--kr-accent);
-      color: var(--kr-accent);
-    }
-    .kairos-roi__toggle-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--kr-border-2);
-      transition: background 180ms var(--kr-ease),
-                  box-shadow 180ms var(--kr-ease);
-    }
-    .kairos-roi__toggle[aria-pressed="true"] .kairos-roi__toggle-dot {
-      background: var(--kr-accent);
-      box-shadow: 0 0 10px rgba(249,99,2,0.7);
-    }
-
-    .kairos-roi__field--money {
-      display: none;
-      animation: kairos-fadein 320ms var(--kr-ease);
-    }
-    .kairos-roi__field--money[data-visible="true"] { display: flex; }
-    @keyframes kairos-fadein {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .kairos-roi__field--money { animation: none; }
-    }
-
-    /* ========== RESULTADOS ========== */
-    .kairos-roi__results {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--kr-gap);
-    }
-    @media (min-width: 640px) {
-      .kairos-roi__results { grid-template-columns: 1fr 1fr; }
-    }
-
-    .kairos-roi__card {
-      background: var(--kr-surface);
-      border: 1px solid var(--kr-border);
-      border-radius: var(--kr-radius-sm);
-      padding: 1.6rem 1.7rem;
-      position: relative;
-    }
-    .kairos-roi__card--accent {
-      border-color: rgba(249,99,2,0.35);
-      background: linear-gradient(180deg,
-        rgba(249,99,2,0.10) 0%, var(--kr-surface) 80%);
-    }
-    .kairos-roi__card--accent::before {
-      content: "";
-      position: absolute; top: 0; left: 0;
-      width: 38px; height: 3px;
-      background: var(--kr-accent);
-      border-radius: 0 0 6px 0;
-    }
-    .kairos-roi__card-value {
-      font-family: var(--kr-font-display);
-      font-size: var(--kr-fs-out);
-      font-weight: 900;
-      letter-spacing: -0.035em;
-      color: var(--kr-text);
-      line-height: 1;
-      margin: 0;
-      font-variant-numeric: tabular-nums;
-    }
-    .kairos-roi__card-value--accent { color: var(--kr-accent); }
-    .kairos-roi__card-unit {
-      font-family: var(--kr-font-display);
-      font-size: 0.95rem;
-      font-weight: 500;
-      letter-spacing: -0.005em;
-      color: var(--kr-text-soft);
-      margin: 0.5rem 0 0 0;
-    }
-
-    .kairos-roi__money-result {
-      display: none;
-      grid-column: 1 / -1;
-      background: var(--kr-surface);
-      border: 1px solid var(--kr-border);
-      border-radius: var(--kr-radius-sm);
-      padding: 1.6rem 1.7rem;
-      position: relative;
-    }
-    .kairos-roi__money-result[data-visible="true"] { display: block; }
-    .kairos-roi__money-result::before {
-      content: "";
-      position: absolute; top: 0; left: 0;
-      width: 38px; height: 3px;
-      background: var(--kr-accent);
-      border-radius: 0 0 6px 0;
-      opacity: 0.6;
-    }
-    .kairos-roi__money-copy {
-      font-family: var(--kr-font-body);
-      font-size: 0.95rem;
-      color: var(--kr-text-soft);
-      margin: 0.7rem 0 0 0;
-    }
-
-    /* ========== CTA ========== */
-    .kairos-roi__cta {
-      margin-top: 2.25rem;
-      padding-top: 1.85rem;
-      border-top: 1px solid var(--kr-border);
-      display: flex; flex-direction: column;
-      gap: 1.1rem; align-items: flex-start;
-    }
-    @media (min-width: 640px) {
-      .kairos-roi__cta {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-    .kairos-roi__cta-text {
-      font-family: var(--kr-font-body);
-      font-size: 0.98rem; color: var(--kr-text-soft);
-      margin: 0;
-    }
-    .kairos-roi__cta-text strong { color: var(--kr-text); font-weight: 700; }
-    .kairos-roi__cta-btn {
-      display: inline-flex; align-items: center; gap: 0.55rem;
-      padding: 0.95rem 1.7rem;
-      font-family: var(--kr-font-display);
-      font-size: 1rem; font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--kr-bg);
-      background: var(--kr-accent);
-      border: 1px solid var(--kr-accent);
-      border-radius: var(--kr-radius-pill);
-      text-decoration: none; white-space: nowrap;
-      transition: background 180ms var(--kr-ease),
-                  border-color 180ms var(--kr-ease),
-                  transform 180ms var(--kr-ease),
-                  box-shadow 180ms var(--kr-ease);
-    }
-    .kairos-roi__cta-btn:hover,
-    .kairos-roi__cta-btn:focus {
-      background: var(--kr-accent-2);
-      border-color: var(--kr-accent-2);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(249,99,2,0.35);
-      outline: none;
-    }
-    .kairos-roi__cta-btn:focus-visible {
-      box-shadow: 0 0 0 3px rgba(249,99,2,0.45);
-    }
-    .kairos-roi__cta-btn::after {
-      content: "→";
-      transition: transform 180ms var(--kr-ease);
-    }
-    .kairos-roi__cta-btn:hover::after { transform: translateX(3px); }
-  </style>
-
-  <!-- =========================================================
-       MARKUP
-       ========================================================= -->
+  <!-- ============ HEADER ============ -->
   <header class="kairos-roi__header">
-  <span class="kairos-roi__logo" aria-label="Activos Kairos">
-    <img class="kairos-roi__logo-img"
-         src="./Logo-Kairos-Fondo-Transparente.png"
-         alt=""
-         width="56" height="56"
-         decoding="async"
-         onerror="this.parentElement.classList.add('kairos-roi__logo--fallback');" />
-    <svg class="kairos-roi__logo-svg" viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
-      <text x="50%" y="54%" text-anchor="middle" dominant-baseline="central"
-            font-family="Satoshi, system-ui, sans-serif" font-weight="900"
-            font-size="52" fill="#F96302">K</text>
-    </svg>
-  </span>
+    <span class="kairos-roi__logo" aria-label="Activos Kairos">
+      <img class="kairos-roi__logo-img"
+           src="./Logo-Kairos-Fondo-Transparente.png"
+           alt="" width="56" height="56" decoding="async"
+           onerror="this.parentElement.classList.add('kairos-roi__logo--fallback');" />
+      <svg class="kairos-roi__logo-svg" viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
+        <text x="50%" y="54%" text-anchor="middle" dominant-baseline="central"
+              font-family="Satoshi, system-ui, sans-serif" font-weight="900"
+              font-size="52" fill="#F96302">K</text>
+      </svg>
+    </span>
+    <h1 id="kairos-roi-h1" class="kairos-roi__h1">
+      Calculadora de Activos <em>Kairos</em>
+    </h1>
+  </header>
 
-  <h1 id="kairos-roi-h1" class="kairos-roi__h1">
-    Calculadora de Activos <em>Kairos</em>
-  </h1>
-</header>
-
-  <!-- ITERACIÓN 1 — coste de la tarea -->
-  <details class="kairos-roi__iter" open>
-     <summary>
-       <h2 class="kairos-roi__title">
-         ¿Cuánto te cuesta la tarea que tu equipo hace <em>en automático</em>?
-       </h2>
-       <div class="kairos-roi__iter-stat" aria-live="polite" aria-label="Horas regaladas al año">
-         <span class="kairos-roi__iter-stat-num" id="kr-iter1-stat">0</span>
-         <span class="kairos-roi__iter-stat-unit">h/año</span>
-       </div>
-       <span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
-     </summary>
+  <!-- ============ ITER 1 — coste de la tarea ============ -->
+  <details class="kairos-roi__iter" data-iter="iter1" data-calc="costeTarea" open>
+    <summary>
+      <h2 class="kairos-roi__title">
+        ¿Cuánto te cuesta la tarea que tu equipo hace <em>en automático</em>?
+      </h2>
+      <div class="kairos-roi__iter-stat" aria-live="polite" aria-label="Horas regaladas al año">
+        <span class="kairos-roi__iter-stat-num" data-output="horasAnio" data-format="int">0</span>
+        <span class="kairos-roi__iter-stat-unit">h/año</span>
+      </div>
+      <span class="kairos-roi__iter-chevron" aria-hidden="true">▾</span>
+    </summary>
 
     <div class="kairos-roi__iter-body">
-
       <p class="kairos-roi__subtitle">
         Esa tarea que se repite cada semana en tu negocio. La que
         <strong>nadie cuestiona</strong> porque "siempre se ha hecho así".
@@ -676,137 +469,112 @@
 
       <form class="kairos-roi__form" novalidate aria-describedby="kairos-roi-h1">
 
-        <!-- Slider 1 -->
-        <div class="kairos-roi__field">
+        <!-- Slider 1: minutos -->
+        <div class="kairos-roi__field" data-input="minutos">
           <div class="kairos-roi__field-head">
             <div>
-              <label class="kairos-roi__label" for="kr-minutos">
-                ¿Cuánto se tarda en hacer la tarea?
-              </label>
+              <label class="kairos-roi__label" for="kr-minutos">¿Cuánto se tarda en hacer la tarea?</label>
               <div class="kairos-roi__hint">Tiempo total a la semana, sumando todas las veces.</div>
             </div>
             <div class="kairos-roi__current">
-              <span id="kr-minutos-display" class="kairos-roi__current-num"
-                    data-slider-id="kr-minutos" tabindex="0"
-                    role="spinbutton" aria-label="Editar minutos">0</span><span class="kairos-roi__current-unit">min/sem</span>
+              <span class="kairos-roi__current-num" id="kr-minutos-display"
+                    data-format="int" tabindex="0" role="spinbutton"
+                    aria-label="Editar minutos">0</span><span class="kairos-roi__current-unit">min/sem</span>
             </div>
           </div>
-          <div class="kairos-roi__slider-wrap" data-slider="minutos">
-            <div class="kairos-roi__bubble" data-bubble-for="kr-minutos">0</div>
-            <input
-              class="kairos-roi__slider"
-              id="kr-minutos"
-              type="range"
-              min="0" max="300" step="1" value="0"
-              aria-valuemin="0" aria-valuemax="300" aria-valuenow="0"
-              aria-label="¿Cuánto se tarda en hacer la tarea? (minutos a la semana)" />
+          <div class="kairos-roi__slider-wrap">
+            <div class="kairos-roi__bubble" data-format="int">0</div>
+            <input class="kairos-roi__slider" id="kr-minutos" type="range"
+                   min="0" max="300" step="1" value="0"
+                   aria-label="¿Cuánto se tarda en hacer la tarea? (minutos a la semana)" />
             <div class="kairos-roi__scale">
               <span>0</span><span>60</span><span>120</span><span>180</span><span>240</span><span>300</span>
             </div>
           </div>
         </div>
 
-        <!-- Slider 2 -->
-        <div class="kairos-roi__field">
+        <!-- Slider 2: personas -->
+        <div class="kairos-roi__field" data-input="personas">
           <div class="kairos-roi__field-head">
             <div>
-              <label class="kairos-roi__label" for="kr-personas">
-                ¿Cuántas personas la realizan?
-              </label>
+              <label class="kairos-roi__label" for="kr-personas">¿Cuántas personas la realizan?</label>
               <div class="kairos-roi__hint">Incluye a quien la supervisa, revisa o corrige.</div>
             </div>
             <div class="kairos-roi__current">
-              <span id="kr-personas-display" class="kairos-roi__current-num"
-                    data-slider-id="kr-personas" tabindex="0"
-                    role="spinbutton" aria-label="Editar personas">0</span><span class="kairos-roi__current-unit">personas</span>
+              <span class="kairos-roi__current-num" id="kr-personas-display"
+                    data-format="int" tabindex="0" role="spinbutton"
+                    aria-label="Editar personas">0</span><span class="kairos-roi__current-unit">personas</span>
             </div>
           </div>
-          <div class="kairos-roi__slider-wrap" data-slider="personas">
-            <div class="kairos-roi__bubble" data-bubble-for="kr-personas">0</div>
-            <input
-              class="kairos-roi__slider"
-              id="kr-personas"
-              type="range"
-              min="0" max="100" step="1" value="0"
-              aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-              aria-label="¿Cuántas personas la realizan?" />
+          <div class="kairos-roi__slider-wrap">
+            <div class="kairos-roi__bubble" data-format="int">0</div>
+            <input class="kairos-roi__slider" id="kr-personas" type="range"
+                   min="0" max="100" step="1" value="0"
+                   aria-label="¿Cuántas personas la realizan?" />
             <div class="kairos-roi__scale">
               <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
             </div>
           </div>
         </div>
 
-        <!-- Toggle €/hora (ancho completo) -->
+        <!-- Toggle €/hora -->
         <div class="kairos-roi__field--full">
-          <button
-            type="button"
-            class="kairos-roi__toggle"
-            id="kr-money-toggle"
-            aria-pressed="false"
-            aria-controls="kr-money-field">
+          <button type="button" class="kairos-roi__toggle"
+                  data-money-toggle aria-pressed="false" aria-controls="kr-money-field">
             <span class="kairos-roi__toggle-dot" aria-hidden="true"></span>
             Quiero ver el equivalente en €
           </button>
         </div>
 
-        <!-- Slider 3 €/hora (ancho completo) -->
+        <!-- Slider 3: €/hora -->
         <div class="kairos-roi__field kairos-roi__field--money kairos-roi__field--full"
-             id="kr-money-field" data-visible="false">
+             id="kr-money-field" data-input="eurohora" data-money-field data-visible="false">
           <div class="kairos-roi__field-head">
             <div>
-              <label class="kairos-roi__label" for="kr-eurohora">
-                €/hora del equipo
-              </label>
+              <label class="kairos-roi__label" for="kr-eurohora">€/hora del equipo</label>
               <div class="kairos-roi__hint">Coste medio por hora trabajada (bruto).</div>
             </div>
             <div class="kairos-roi__current">
-              <span id="kr-eurohora-display" class="kairos-roi__current-num"
-                    data-slider-id="kr-eurohora" tabindex="0"
-                    role="spinbutton" aria-label="Editar euros por hora">0</span><span class="kairos-roi__current-unit">€/hora</span>
+              <span class="kairos-roi__current-num" id="kr-eurohora-display"
+                    data-format="int" tabindex="0" role="spinbutton"
+                    aria-label="Editar euros por hora">0</span><span class="kairos-roi__current-unit">€/hora</span>
             </div>
           </div>
-          <div class="kairos-roi__slider-wrap" data-slider="eurohora">
-            <div class="kairos-roi__bubble" data-bubble-for="kr-eurohora">0 €</div>
-            <input
-              class="kairos-roi__slider"
-              id="kr-eurohora"
-              type="range"
-              min="0" max="200" step="1" value="0"
-              aria-valuemin="0" aria-valuemax="200" aria-valuenow="0"
-              aria-label="Euros por hora del equipo" />
+          <div class="kairos-roi__slider-wrap">
+            <div class="kairos-roi__bubble" data-format="int" data-suffix=" €">0 €</div>
+            <input class="kairos-roi__slider" id="kr-eurohora" type="range"
+                   min="0" max="200" step="1" value="0"
+                   aria-label="Euros por hora del equipo" />
             <div class="kairos-roi__scale">
               <span>0 €</span><span>40 €</span><span>80 €</span><span>120 €</span><span>160 €</span><span>200 €</span>
             </div>
           </div>
         </div>
-
       </form>
 
-      <!-- ========== RESULTADOS ========== -->
+      <!-- Resultados -->
       <section class="kairos-roi__results" aria-live="polite" aria-atomic="true">
-
         <article class="kairos-roi__card kairos-roi__card--accent">
-          <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-semana">0</p>
+          <p class="kairos-roi__card-value kairos-roi__card-value--accent"
+             data-output="horasSemana" data-format="num1">0</p>
           <p class="kairos-roi__card-unit">horas / semana regaladas</p>
         </article>
-
         <article class="kairos-roi__card kairos-roi__card--accent">
-          <p class="kairos-roi__card-value kairos-roi__card-value--accent" id="kr-out-anio">0</p>
+          <p class="kairos-roi__card-value kairos-roi__card-value--accent"
+             data-output="horasAnio" data-format="int">0</p>
           <p class="kairos-roi__card-unit">horas / año regaladas (48 semanas laborables)</p>
         </article>
-
-        <article class="kairos-roi__money-result" id="kr-money" data-visible="false">
-          <p class="kairos-roi__card-value" id="kr-out-euros">0 €</p>
+        <article class="kairos-roi__money-result" data-money-result data-visible="false">
+          <p class="kairos-roi__card-value" data-output="euros" data-format="eur">0 €</p>
           <p class="kairos-roi__card-unit">regalados cada año en esa tarea</p>
           <p class="kairos-roi__money-copy">
-            Esto es lo que llevas años pagando por una tarea que ni genera
-            ingresos ni diferencia tu negocio. Y es solo la punta del iceberg.
+            Esto es lo que llevas años pagando por una tarea que ni genera ingresos
+            ni diferencia tu negocio. Y es solo la punta del iceberg.
           </p>
         </article>
-
       </section>
 
-      <!-- ========== CTA ========== -->
+      <!-- CTA -->
       <footer class="kairos-roi__cta">
         <p class="kairos-roi__cta-text">
           Y esto es solo el coste <strong>evidente</strong>. El real incluye errores,
@@ -815,255 +583,305 @@
         </p>
         <a class="kairos-roi__cta-btn" href="#contacto" rel="noopener">Hablemos</a>
       </footer>
-
     </div>
   </details>
 
   <!-- ============================================================
-       AQUÍ IRÁ LA ITERACIÓN 2 (futura):
-       ¿Cuánto tiempo gasta tu equipo buscando información para hacer 1 tarea?
+       AQUÍ va el ITER 2: copia el bloque <details> de arriba,
+       cambia data-iter, data-calc, IDs (kr-*), labels y outputs.
+       Y añade la fórmula correspondiente en CALCS abajo.
        ============================================================ -->
 
-  <!-- =========================================================
-       LÓGICA
-       ========================================================= -->
-  <script>
-    (function () {
-      var SEMANAS_LABORABLES_AL_ANIO = 48;
-      var REDUCED_MOTION = window.matchMedia &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+</div>
 
-      var slMin = document.getElementById('kr-minutos');
-      var slPer = document.getElementById('kr-personas');
-      var slEur = document.getElementById('kr-eurohora');
+<script>
+(function () {
+  'use strict';
 
-      var dspMin = document.getElementById('kr-minutos-display');
-      var dspPer = document.getElementById('kr-personas-display');
-      var dspEur = document.getElementById('kr-eurohora-display');
+  var ROOT = document.querySelector('.kairos-roi');
+  if (!ROOT) return;
 
-      var outSemana = document.getElementById('kr-out-semana');
-      var outAnio   = document.getElementById('kr-out-anio');
-      var outEuros  = document.getElementById('kr-out-euros');
-      var moneyBox  = document.getElementById('kr-money');
+  var REDUCED_MOTION = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      var moneyToggle = document.getElementById('kr-money-toggle');
-      var moneyField  = document.getElementById('kr-money-field');
+  var SEMANAS_LABORABLES = 48;
 
-      var fmtNum1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
-      var fmtInt  = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
-      var fmtEur  = new Intl.NumberFormat('es-ES', {
-        style: 'currency', currency: 'EUR', maximumFractionDigits: 0
+  /* ============ FORMATS REGISTRY ============ */
+  var FORMATS = {
+    int:  new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }),
+    num1: new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 }),
+    eur:  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+  };
+  function fmt(v, id) { return (FORMATS[id] || FORMATS.int).format(v); }
+
+  /* ============ CALCS REGISTRY ============
+     Cada función recibe (inputs, ctx) y devuelve un objeto
+     cuyas claves coinciden con los [data-output] del DOM. */
+  var CALCS = {
+    // ITER 1
+    costeTarea: function (i, ctx) {
+      var horasSemana = (i.minutos * i.personas) / 60;
+      var horasAnio   = horasSemana * SEMANAS_LABORABLES;
+      var euros       = ctx.moneyOn ? horasAnio * (i.eurohora || 0) : 0;
+      return { horasSemana: horasSemana, horasAnio: horasAnio, euros: euros };
+    }
+    // ITER 2 (cuando llegue):
+    // costeBusqueda: function (i, ctx) { ... }
+  };
+
+  /* ============ HELPERS ============ */
+  function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+
+  function paintTrack(slider) {
+    var min = parseFloat(slider.min), max = parseFloat(slider.max);
+    var pct = max === min ? 0 : ((parseFloat(slider.value) - min) / (max - min)) * 100;
+    slider.style.setProperty('--kr-fill', pct.toFixed(3));
+    slider.setAttribute('aria-valuenow', slider.value);
+  }
+
+  function positionBubble(slider, bubble) {
+    var trackW = slider.offsetWidth;
+    if (trackW === 0) return;
+    var min = parseFloat(slider.min), max = parseFloat(slider.max);
+    var pct = max === min ? 0 : (parseFloat(slider.value) - min) / (max - min);
+    var thumbW = 30;
+    bubble.style.left = (pct * (trackW - thumbW) + thumbW / 2) + 'px';
+  }
+
+  function animateNumber(el, target) {
+    var formatId = el.dataset.format || 'int';
+    var formatter = function (v) { return fmt(v, formatId); };
+    var start = parseFloat(el.dataset.current || '0');
+    if (REDUCED_MOTION || start === target || isNaN(start)) {
+      el.textContent = formatter(target);
+      el.dataset.current = String(target);
+      return;
+    }
+    if (el._raf) cancelAnimationFrame(el._raf);
+    var t0 = performance.now(), dur = 380;
+    function tick(now) {
+      var t = Math.min(1, (now - t0) / dur);
+      var eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = formatter(start + (target - start) * eased);
+      if (t < 1) el._raf = requestAnimationFrame(tick);
+      else el.dataset.current = String(target);
+    }
+    el._raf = requestAnimationFrame(tick);
+  }
+
+  /* ============ ENGINE: setup por iteración ============ */
+  function setupIter(iterEl) {
+    var calcName = iterEl.dataset.calc;
+    var calc = CALCS[calcName];
+    if (!calc) {
+      console.warn('[Kairos ROI] No CALCS["' + calcName + '"] registrado para', iterEl);
+      return null;
+    }
+
+    /* Cache inputs */
+    var inputs = [];
+    iterEl.querySelectorAll('[data-input]').forEach(function (field) {
+      var slider = field.querySelector('input[type="range"]');
+      if (!slider) return;
+      inputs.push({
+        name:    field.dataset.input,
+        field:   field,
+        slider:  slider,
+        wrap:    field.querySelector('.kairos-roi__slider-wrap'),
+        bubble:  field.querySelector('.kairos-roi__bubble'),
+        display: field.querySelector('.kairos-roi__current-num')
+      });
+    });
+
+    var outputs     = iterEl.querySelectorAll('[data-output]');
+    var moneyToggle = iterEl.querySelector('[data-money-toggle]');
+    var moneyField  = iterEl.querySelector('[data-money-field]');
+    var moneyResult = iterEl.querySelector('[data-money-result]');
+
+    function readInputs() {
+      var v = {};
+      for (var k = 0; k < inputs.length; k++) {
+        v[inputs[k].name] = parseFloat(inputs[k].slider.value) || 0;
+      }
+      return v;
+    }
+    function isMoneyOn() {
+      return !!(moneyToggle && moneyToggle.getAttribute('aria-pressed') === 'true');
+    }
+
+    /* recalc batched a 1 frame */
+    var queued = false;
+    function recalc() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () {
+        queued = false;
+        doRecalc();
+      });
+    }
+
+    function doRecalc() {
+      var vals = readInputs();
+      var ctx  = { moneyOn: isMoneyOn() };
+      var result = calc(vals, ctx);
+
+      // Refresca displays + burbujas (usando valores crudos)
+      inputs.forEach(function (inp) {
+        var val = vals[inp.name];
+        if (inp.display && !inp.display.classList.contains('is-editing')) {
+          inp.display.textContent = fmt(val, inp.display.dataset.format || 'int');
+        }
+        if (inp.bubble) {
+          var bf = inp.bubble.dataset.format || 'int';
+          var sx = inp.bubble.dataset.suffix || '';
+          inp.bubble.textContent = fmt(val, bf) + sx;
+        }
       });
 
-      function pctSlider(slider) {
-        var min = parseFloat(slider.min);
-        var max = parseFloat(slider.max);
-        var val = parseFloat(slider.value);
-        if (max === min) return 0;
-        return ((val - min) / (max - min)) * 100;
+      // Outputs (cards + stat chip — todo lo que tenga data-output)
+      outputs.forEach(function (out) {
+        var k = out.dataset.output;
+        if (k in result) animateNumber(out, result[k]);
+      });
+
+      // Visibilidad money
+      if (moneyResult) {
+        var showMoney = ctx.moneyOn && (vals.eurohora > 0);
+        moneyResult.setAttribute('data-visible', showMoney ? 'true' : 'false');
       }
-      function paintSlider(slider) {
-        var pct = pctSlider(slider);
-        slider.style.setProperty('--kr-fill', pct.toFixed(3));
-        slider.setAttribute('aria-valuenow', slider.value);
+    }
+
+    /* Bind sliders */
+    inputs.forEach(function (inp) {
+      var update = function () {
+        paintTrack(inp.slider);
+        if (inp.bubble && inp.wrap) positionBubble(inp.slider, inp.bubble);
+        recalc();
+      };
+      inp.slider.addEventListener('input', update);
+
+      if (inp.wrap) {
+        var on  = function () { inp.wrap.setAttribute('data-active', 'true'); };
+        var off = function () { inp.wrap.removeAttribute('data-active'); };
+        inp.slider.addEventListener('pointerdown', on);
+        inp.slider.addEventListener('pointerup',   off);
+        inp.slider.addEventListener('pointercancel', off);
+        inp.slider.addEventListener('focus', on);
+        inp.slider.addEventListener('blur',  off);
       }
-      function positionBubble(slider, bubble) {
-        var min = parseFloat(slider.min);
-        var max = parseFloat(slider.max);
-        var val = parseFloat(slider.value);
-        var pct = (max === min) ? 0 : (val - min) / (max - min);
-        var thumbW = 30;
-        var trackW = slider.offsetWidth;
-        if (trackW === 0) return;
-        var x = pct * (trackW - thumbW) + thumbW / 2;
-        bubble.style.left = x + 'px';
+      update();
+    });
+
+    /* Bind override numérico (click en display) */
+    inputs.forEach(function (inp) {
+      if (!inp.display) return;
+      var d = inp.display, s = inp.slider;
+
+      function startEdit() {
+        if (d.classList.contains('is-editing')) return;
+        d.classList.add('is-editing');
+        d.contentEditable = 'plaintext-only';
+        d.textContent = String(s.value);
+        var range = document.createRange();
+        range.selectNodeContents(d);
+        var sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(range);
+        d.focus();
+      }
+      function commitEdit() {
+        if (!d.classList.contains('is-editing')) return;
+        var raw = (d.textContent || '').replace(/[^\d.-]/g, '');
+        var v = parseFloat(raw);
+        if (isNaN(v)) v = parseFloat(s.value) || 0;
+        v = clamp(Math.round(v), parseFloat(s.min), parseFloat(s.max));
+        d.classList.remove('is-editing');
+        d.contentEditable = 'false';
+        s.value = v;
+        s.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      function cancelEdit() {
+        if (!d.classList.contains('is-editing')) return;
+        d.classList.remove('is-editing');
+        d.contentEditable = 'false';
+        s.dispatchEvent(new Event('input', { bubbles: true }));
       }
 
-      function animateValue(el, target, formatter) {
-        var startVal = parseFloat(el.dataset.current || '0');
-        if (REDUCED_MOTION || startVal === target) {
-          el.textContent = formatter(target);
-          el.dataset.current = target;
+      d.addEventListener('click', startEdit);
+      d.addEventListener('blur',  commitEdit);
+      d.addEventListener('keydown', function (e) {
+        if (!d.classList.contains('is-editing')) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startEdit(); }
           return;
         }
-        if (el._raf) cancelAnimationFrame(el._raf);
-        var duration = 380;
-        var startTime = performance.now();
-        function tick(now) {
-          var t = Math.min(1, (now - startTime) / duration);
-          var eased = 1 - Math.pow(1 - t, 3);
-          var v = startVal + (target - startVal) * eased;
-          el.textContent = formatter(v);
-          if (t < 1) el._raf = requestAnimationFrame(tick);
-          else el.dataset.current = target;
-        }
-        el._raf = requestAnimationFrame(tick);
-      }
-
-      function recalcular() {
-        var minutos  = parseFloat(slMin.value) || 0;
-        var personas = parseFloat(slPer.value) || 0;
-        var euroHora = parseFloat(slEur.value) || 0;
-        var moneyOn  = moneyToggle.getAttribute('aria-pressed') === 'true';
-
-        // Solo refrescamos los displays si NO se están editando
-        if (!dspMin.classList.contains('is-editing')) dspMin.textContent = fmtInt.format(minutos);
-        if (!dspPer.classList.contains('is-editing')) dspPer.textContent = fmtInt.format(personas);
-        if (!dspEur.classList.contains('is-editing')) dspEur.textContent = fmtInt.format(euroHora);
-
-        document.querySelector('[data-bubble-for="kr-minutos"]').textContent  = fmtInt.format(minutos);
-        document.querySelector('[data-bubble-for="kr-personas"]').textContent = fmtInt.format(personas);
-        document.querySelector('[data-bubble-for="kr-eurohora"]').textContent = fmtInt.format(euroHora) + ' €';
-
-        var horasSemana = (minutos * personas) / 60;
-        var horasAnio   = horasSemana * SEMANAS_LABORABLES_AL_ANIO;
-
-        animateValue(outSemana, horasSemana, function (v) { return fmtNum1.format(v); });
-        animateValue(outAnio,   horasAnio,   function (v) { return fmtInt.format(v); });
-
-          var iterStat = document.getElementById('kr-iter1-stat');
-          if (iterStat) animateValue(iterStat, horasAnio, function (v) { return fmtInt.format(v); });
-
-        if (moneyOn && euroHora > 0) {
-          var euros = horasAnio * euroHora;
-          animateValue(outEuros, euros, function (v) { return fmtEur.format(v); });
-          moneyBox.setAttribute('data-visible', 'true');
+        if (e.key === 'Enter') { e.preventDefault(); commitEdit(); }
+        else if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+      });
+      // Pegado: limpia caracteres no numéricos sin usar execCommand (deprecated)
+      d.addEventListener('paste', function (e) {
+        e.preventDefault();
+        var text = ((e.clipboardData || window.clipboardData).getData('text') || '');
+        var clean = text.replace(/[^\d.-]/g, '');
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount) {
+          var r = sel.getRangeAt(0);
+          r.deleteContents();
+          r.insertNode(document.createTextNode(clean));
+          r.collapse(false);
+          sel.removeAllRanges(); sel.addRange(r);
         } else {
-          moneyBox.setAttribute('data-visible', 'false');
-          outEuros.dataset.current = '0';
-          outEuros.textContent = '0 €';
+          d.textContent = clean;
         }
-      }
+      });
+    });
 
-      function bindSlider(slider) {
-        var wrap   = slider.closest('.kairos-roi__slider-wrap');
-        var bubble = wrap.querySelector('.kairos-roi__bubble');
-
-        function update() {
-          paintSlider(slider);
-          positionBubble(slider, bubble);
-          recalcular();
-        }
-        slider.addEventListener('input', update);
-        slider.addEventListener('change', update);
-
-        var setActive   = function () { wrap.setAttribute('data-active', 'true'); };
-        var unsetActive = function () { wrap.removeAttribute('data-active'); };
-        slider.addEventListener('pointerdown', setActive);
-        slider.addEventListener('pointerup', unsetActive);
-        slider.addEventListener('pointercancel', unsetActive);
-        slider.addEventListener('touchstart', setActive, { passive: true });
-        slider.addEventListener('touchend', unsetActive);
-        slider.addEventListener('focus', setActive);
-        slider.addEventListener('blur', unsetActive);
-
-        update();
-      }
-
-      // ========== Override numérico: click sobre el valor para escribirlo ==========
-      function bindEditable(displaySpan, slider) {
-        function startEdit() {
-          if (displaySpan.classList.contains('is-editing')) return;
-          displaySpan.classList.add('is-editing');
-          displaySpan.contentEditable = 'plaintext-only';
-          displaySpan.textContent = slider.value; // valor crudo (sin formato es-ES)
-          // Selecciona todo
-          var range = document.createRange();
-          range.selectNodeContents(displaySpan);
-          var sel = window.getSelection();
-          sel.removeAllRanges(); sel.addRange(range);
-          displaySpan.focus();
-        }
-        function commit() {
-          if (!displaySpan.classList.contains('is-editing')) return;
-          var raw = (displaySpan.textContent || '').replace(/[^\d.-]/g, '');
-          var v = parseFloat(raw);
-          if (isNaN(v)) v = parseFloat(slider.value) || 0;
-          var min = parseFloat(slider.min);
-          var max = parseFloat(slider.max);
-          v = Math.max(min, Math.min(max, Math.round(v)));
-          displaySpan.classList.remove('is-editing');
-          displaySpan.contentEditable = 'false';
-          slider.value = v;
-          slider.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        function cancel() {
-          if (!displaySpan.classList.contains('is-editing')) return;
-          displaySpan.classList.remove('is-editing');
-          displaySpan.contentEditable = 'false';
-          // Repinta valor actual con formato es-ES
-          slider.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        displaySpan.addEventListener('click', startEdit);
-        displaySpan.addEventListener('keydown', function (e) {
-          // Si NO está en edición, Enter o Espacio inician edición (accesibilidad)
-          if (!displaySpan.classList.contains('is-editing')) {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              startEdit();
-            }
-            return;
-          }
-          // En edición:
-          if (e.key === 'Enter') { e.preventDefault(); commit(); }
-          else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
-        });
-        displaySpan.addEventListener('blur', commit);
-        // Bloquea pegar contenido raro
-        displaySpan.addEventListener('paste', function (e) {
-          e.preventDefault();
-          var text = (e.clipboardData || window.clipboardData).getData('text');
-          var clean = text.replace(/[^\d.-]/g, '');
-          document.execCommand('insertText', false, clean);
-        });
-      }
-
-      bindSlider(slMin);
-      bindSlider(slPer);
-      bindSlider(slEur);
-
-      bindEditable(dspMin, slMin);
-      bindEditable(dspPer, slPer);
-      bindEditable(dspEur, slEur);
-
+    /* Money toggle */
+    if (moneyToggle && moneyField) {
       moneyToggle.addEventListener('click', function () {
-        var on = moneyToggle.getAttribute('aria-pressed') === 'true';
-        var next = !on;
+        var next = moneyToggle.getAttribute('aria-pressed') !== 'true';
         moneyToggle.setAttribute('aria-pressed', next ? 'true' : 'false');
-        moneyField.setAttribute('data-visible', next ? 'true' : 'false');
+        moneyField.setAttribute('data-visible',  next ? 'true' : 'false');
         if (next) {
           requestAnimationFrame(function () {
-            paintSlider(slEur);
-            positionBubble(
-              slEur,
-              document.querySelector('[data-bubble-for="kr-eurohora"]')
-            );
+            var ec = inputs.filter(function (x) { return x.field === moneyField; })[0];
+            if (ec) {
+              paintTrack(ec.slider);
+              if (ec.bubble) positionBubble(ec.slider, ec.bubble);
+            }
           });
         }
-        recalcular();
+        recalc();
       });
+    }
 
-      function repaintAll() {
-        [slMin, slPer, slEur].forEach(function (s) {
-          var b = document.querySelector('[data-bubble-for="' + s.id + '"]');
-          paintSlider(s);
-          positionBubble(s, b);
-        });
-      }
-
-      var resizeRaf;
-      window.addEventListener('resize', function () {
-        if (resizeRaf) cancelAnimationFrame(resizeRaf);
-        resizeRaf = requestAnimationFrame(repaintAll);
+    /* Repaint hook (para resize global y toggle de details) */
+    function repaint() {
+      inputs.forEach(function (inp) {
+        paintTrack(inp.slider);
+        if (inp.bubble) positionBubble(inp.slider, inp.bubble);
       });
+    }
 
-      document.querySelectorAll('.kairos-roi__iter').forEach(function (det) {
-        det.addEventListener('toggle', function () {
-          if (det.open) requestAnimationFrame(repaintAll);
-        });
-      });
-    })();
-  </script>
+    iterEl.addEventListener('toggle', function () {
+      if (iterEl.open) requestAnimationFrame(repaint);
+    });
 
-</div>
+    return repaint;
+  }
+
+  /* ============ INIT ============ */
+  var repaintHooks = [];
+  ROOT.querySelectorAll('.kairos-roi__iter').forEach(function (iterEl) {
+    var hook = setupIter(iterEl);
+    if (hook) repaintHooks.push(hook);
+  });
+
+  /* Resize throttled */
+  var resizeRaf = null;
+  window.addEventListener('resize', function () {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(function () {
+      repaintHooks.forEach(function (fn) { fn(); });
+    });
+  });
+})();
+</script>
